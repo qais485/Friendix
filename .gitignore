@@ -109,3 +109,13 @@ secrets/
 credentials/
 *.pem
 *.key
+
+# Internal folders
+.opencode/
+Buges/
+graphify-out/
+Rules/
+UI images/
+
+# Root markdown files (اگر همه md های root را نمی‌خواهی)
+*.md
