@@ -1,0 +1,111 @@
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
+
+
+# =========================
+# Python Backend
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.so
+
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+
+*.egg-info/
+.installed.cfg
+*.egg
+
+
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+
+# =========================
+# FastAPI / Database
+# =========================
+*.sqlite3
+*.db
+
+alembic/versions/__pycache__/
+
+
+# =========================
+# React Frontend
+# =========================
+node_modules/
+dist/
+build/
+
+.vite/
+.cache/
+
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+*.swp
+*.swo
+
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+
+# =========================
+# Testing
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+
+# =========================
+# AI / Temporary Files
+# =========================
+graphify-out/
+*.tmp
+*.temp
+
+
+# =========================
+# Project Secrets
+# =========================
+secrets/
+credentials/
+*.pem
+*.key
