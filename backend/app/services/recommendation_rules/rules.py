@@ -300,7 +300,7 @@ class DiversityRule(RecommendationRule):
                     range(len(remaining)),
                     key=lambda i: (
                         creator_count.get(remaining[i].creator_id, 0) if remaining[i].creator_id else 0,
-                        category_count.get(_cat_key(remaining[i]), 0),
+                        category_count.get(cat_key(remaining[i]), 0),
                         -remaining[i].score,
                     ),
                 )
@@ -309,7 +309,7 @@ class DiversityRule(RecommendationRule):
             placed.append(chosen)
             if chosen.creator_id:
                 creator_count[chosen.creator_id] = creator_count.get(chosen.creator_id, 0) + 1
-            cat = chosen.category_id or (chosen.category_name.lower() if chosen.category_name else None)
+            cat = cat_key(chosen)
             if cat:
                 category_count[cat] = category_count.get(cat, 0) + 1
 

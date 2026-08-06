@@ -21,6 +21,7 @@ from app.api.v1.interests import router as interests_router
 from app.api.v1.content_profiles import router as content_profiles_router
 from app.api.v1.ranking import router as ranking_router
 from app.api.v1.recommendations import router as recommendations_router
+from app.api.v1.feed_generator import router as feed_generator_router
 from app.api.v1.settings import router as settings_router
 
 api_router = APIRouter()
@@ -46,4 +47,5 @@ api_router.include_router(interests_router, prefix="/interests", tags=["User Int
 api_router.include_router(content_profiles_router, prefix="/content-profiles", tags=["Content Profiles"])
 api_router.include_router(ranking_router, prefix="/ranking", tags=["Ranking"])
 api_router.include_router(recommendations_router, prefix="/recommendations", tags=["Recommendations"])
+api_router.include_router(feed_generator_router, prefix="/feed", tags=["Feed"])
 api_router.include_router(settings_router, prefix="", tags=["Settings"])

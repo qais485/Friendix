@@ -1,111 +1,111 @@
-# =========================
-# Environment Variables
-# =========================
-.env
-.env.*
-!.env.example
+# # =========================
+# # Environment Variables
+# # =========================
+# .env
+# .env.*
+# !.env.example
 
-# =========================
-# Python
-# =========================
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
+# # =========================
+# # Python
+# # =========================
+# __pycache__/
+# *.py[cod]
+# *$py.class
+# *.so
 
-.venv/
-venv/
-env/
-ENV/
+# .venv/
+# venv/
+# env/
+# ENV/
 
-.Python
-build/
-dist/
-develop-eggs/
-downloads/
-eggs/
-.eggs/
-parts/
-sdist/
-var/
-wheels/
-pip-wheel-metadata/
+# .Python
+# build/
+# dist/
+# develop-eggs/
+# downloads/
+# eggs/
+# .eggs/
+# parts/
+# sdist/
+# var/
+# wheels/
+# pip-wheel-metadata/
 
-*.egg-info/
-.installed.cfg
-*.egg
+# *.egg-info/
+# .installed.cfg
+# *.egg
 
-# =========================
-# Database
-# =========================
-*.sqlite3
-*.db
+# # =========================
+# # Database
+# # =========================
+# *.sqlite3
+# *.db
 
-# =========================
-# React / Node
-# =========================
-node_modules/
-.vite/
-.cache/
-coverage/
+# # =========================
+# # React / Node
+# # =========================
+# node_modules/
+# .vite/
+# .cache/
+# coverage/
 
-# Build outputs
-frontend/dist/
-backend/dist/
-build/
+# # Build outputs
+# frontend/dist/
+# backend/dist/
+# build/
 
-# =========================
-# Logs
-# =========================
-*.log
-logs/
+# # =========================
+# # Logs
+# # =========================
+# *.log
+# logs/
 
-# =========================
-# IDE
-# =========================
-.vscode/
-.idea/
-*.swp
-*.swo
+# # =========================
+# # IDE
+# # =========================
+# .vscode/
+# .idea/
+# *.swp
+# *.swo
 
-# =========================
-# OS
-# =========================
-.DS_Store
-Thumbs.db
+# # =========================
+# # OS
+# # =========================
+# .DS_Store
+# Thumbs.db
 
-# =========================
-# Testing
-# =========================
-.pytest_cache/
-.coverage
-htmlcov/
+# # =========================
+# # Testing
+# # =========================
+# .pytest_cache/
+# .coverage
+# htmlcov/
 
-# =========================
-# Temporary Files
-# =========================
-*.tmp
-*.temp
+# # =========================
+# # Temporary Files
+# # =========================
+# *.tmp
+# *.temp
 
-# =========================
-# Secrets
-# =========================
-secrets/
-credentials/
-*.pem
-*.key
+# # =========================
+# # Secrets
+# # =========================
+# secrets/
+# credentials/
+# *.pem
+# *.key
 
-# =========================
-# Personal / Local folders
-# =========================
-.opencode/
-Buges/
-graphify-out/
-Rules/
-UI images/
+# # =========================
+# # Personal / Local folders
+# # =========================
+# .opencode/
+# Buges/
+# graphify-out/
+# Rules/
+# UI images/
 
-# =========================
-# Documentation (optional)
-# =========================
-# Uncomment if you don't want to commit markdown files
-# *.md
+# # =========================
+# # Documentation (optional)
+# # =========================
+# # Uncomment if you don't want to commit markdown files
+# # *.md

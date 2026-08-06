@@ -43,17 +43,36 @@ class RecommendationService:
         limit: int,
         offset: int,
     ) -> RecommendationResponse:
-        ranked = self.ranking.preview(user_id, content_type, limit, offset)
+        total, personalized, items = self._build_ordered(
+            user_id, content_type, offset + limit
+        )
+        page = items[offset:offset + limit]
+        return RecommendationResponse(
+            user_id=user_id,
+            personalized=personalized,
+            total=total,
+            kept=len(page),
+            rules_applied=self.engine.active_rule_names,
+            items=page,
+        )
+
+    def _build_ordered(
+        self,
+        user_id: UUID | None,
+        content_type: str | None,
+        pool: int,
+    ) -> tuple[int, bool, list[RecommendedItem]]:
+        """Rank up to ``pool`` candidates then run the rules.
+
+        Returns ``(total_candidates, personalized, ordered_items)`` where
+        ``ordered_items`` is the final post-rules list, already deduped, limited
+        and diversified — ready for a consumer to paginate. Shared by the
+        recommendation endpoint and the Phase 5 feed generator.
+        """
+        ranked = self.ranking.preview(user_id, content_type, pool, 0)
 
         if not ranked.items:
-            return RecommendationResponse(
-                user_id=user_id,
-                personalized=ranked.personalized,
-                total=ranked.total,
-                kept=0,
-                rules_applied=self.engine.active_rule_names,
-                items=[],
-            )
+            return ranked.total, ranked.personalized, []
 
         # Enrich candidates with content features (creator/category/topics/...).
         keys = [(i.content_type, i.content_id) for i in ranked.items]
@@ -99,14 +118,7 @@ class RecommendationService:
             _to_recommended_item(c, by_key[(c.content_type, c.content_id)], run.events)
             for c in run.kept
         ]
-        return RecommendationResponse(
-            user_id=user_id,
-            personalized=ranked.personalized,
-            total=ranked.total,
-            kept=len(items),
-            rules_applied=self.engine.active_rule_names,
-            items=items,
-        )
+        return ranked.total, ranked.personalized, items
 
     def rules_info(self) -> RulesInfoResponse:
         return RulesInfoResponse(
