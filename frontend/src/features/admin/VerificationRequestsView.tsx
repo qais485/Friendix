@@ -8,6 +8,7 @@ import {
 import { adminApi } from "@/services/adminApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import type { VerificationRequest } from "@/types";
 
@@ -86,8 +87,12 @@ export function VerificationRequestsView() {
               <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-start">
                 <div className="flex items-center gap-3">
                   <img
-                    src={req.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(req.full_name || "U")}`}
+                    src={getCloudinaryTransformedUrl(req.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(req.full_name || "U")}`, "avatar")}
                     alt=""
+                    width={48}
+                    height={48}
+                    loading="lazy"
+                    decoding="async"
                     className="h-12 w-12 rounded-full object-cover"
                   />
                   <div>

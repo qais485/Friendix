@@ -11,7 +11,9 @@ import {
   Film,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { cn } from "@/lib/utils";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 import { getMediaDisplayUrl, useSecureMediaUrl } from "@/lib/media";
 import { formatFileSize } from "@/utils";
 import type { Media } from "@/types";
@@ -67,12 +69,11 @@ export function MediaViewer({
       currentMedia.media_type === "live_photo"
     ) {
       return (
-        <img
-          src={secureUrl || undefined}
+        <OptimizedImage
+          src={secureUrl || ""}
           alt={currentMedia.alt_text || currentMedia.original_name || "Media"}
-          width={currentMedia.width || 1200}
-          height={currentMedia.height || 900}
-          decoding="async"
+          preset="full"
+          eager
           className="max-h-[80vh] max-w-full object-contain"
         />
       );
@@ -82,6 +83,7 @@ export function MediaViewer({
       return (
         <video
           src={secureUrl || undefined}
+          poster={getVideoPosterUrl(secureUrl)}
           className="max-h-[80vh] max-w-full rounded-lg"
           controls
           autoPlay

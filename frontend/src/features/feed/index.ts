@@ -34,6 +34,7 @@ export {
 export {
   PostCard,
   CreatePostForm,
+  CreatePostButton,
   FeedTabs,
   FeedFilters,
   EmptyFeed,

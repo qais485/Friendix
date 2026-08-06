@@ -126,25 +126,38 @@ export function useUnsendMessage() {
 }
 
 export function useAddReaction() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ messageId, emoji }: { messageId: string; emoji: string }) => {
       await messagingApi.addReaction(messageId, emoji);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messaging", "messages"] });
     },
   });
 }
 
 export function useRemoveReaction() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (messageId: string) => {
       await messagingApi.removeReaction(messageId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messaging", "messages"] });
     },
   });
 }
 
 export function useMarkAsRead() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (messageId: string) => {
       await messagingApi.markAsRead(messageId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messaging", "messages"] });
+      queryClient.invalidateQueries({ queryKey: ["messaging", "conversations"] });
     },
   });
 }
@@ -225,14 +238,19 @@ export function useOnlineStatus(userId: string | undefined) {
     },
     enabled: !!userId,
     refetchInterval: 30000,
+    staleTime: 0,
   });
 }
 
 export function useForwardMessage() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ messageId, conversationId }: { messageId: string; conversationId: string }) => {
       const { data } = await messagingApi.forwardMessage(messageId, [conversationId]);
       return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["messaging", "conversations"] });
     },
   });
 }

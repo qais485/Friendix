@@ -19,6 +19,10 @@ from app.models.models import (
     VideoCategory, Video, VideoLike, VideoComment, WatchLater,
     Playlist, PlaylistVideo, WatchHistory,
     ProfileView,
+    ContentEvent, ViewSession,
+    InterestProfile, UserInterest, InterestEventSignal,
+    ContentProfile,
+    MetricsState,
 )
 
 __all__ = [
@@ -42,4 +46,8 @@ __all__ = [
     "VideoCategory", "Video", "VideoLike", "VideoComment", "WatchLater",
     "Playlist", "PlaylistVideo", "WatchHistory",
     "ProfileView",
+    "ContentEvent", "ViewSession",
+    "InterestProfile", "UserInterest", "InterestEventSignal",
+    "ContentProfile",
+    "MetricsState",
 ]

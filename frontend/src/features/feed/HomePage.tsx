@@ -8,6 +8,15 @@ import { useAuthStore } from "@/store/authStore";
 import { useBlockUser, useMuteUser } from "@/features/privacy/hooks";
 import { useSendFriendRequest, useFollow, useAddCloseFriend } from "@/features/friends/hooks";
 import { useToast } from "@/hooks/useToast";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
+import { useScrollRestoration } from "@/hooks/useScrollRestoration";
+import { PostSkeleton } from "@/components/ui/Skeleton";
+import { ErrorState } from "@/components/ui/ErrorState";
+
+function errorMessage(err: unknown): string {
+  const e = err as { response?: { data?: { detail?: string } }; message?: string };
+  return e.response?.data?.detail ?? e.message ?? "Something went wrong";
+}
 import {
   useHomeFeed,
   useFollowingFeed,
@@ -34,7 +43,7 @@ import {
 import {
   PostCard,
   PostModal,
-  CreatePostForm,
+  CreatePostButton,
   FeedTabs,
   FeedFilters,
   EmptyFeed,
@@ -109,49 +118,66 @@ export function HomePage() {
     }
   }, [hasNextPage, isFetchingNext, activeFeed]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) handleLoadMore();
-      },
-      { threshold: 0.1 }
-    );
-    if (observerRef.current) observer.observe(observerRef.current);
-    return () => observer.disconnect();
-  }, [handleLoadMore]);
+  useInfiniteScroll(observerRef, handleLoadMore);
 
-  const handleCreatePost = async (data: PostCreate) => { await createPost.mutateAsync(data); };
-  const handleDeletePost = (postId: string) => {
+  useScrollRestoration(`feed:${activeTab}`, !!userId);
+
+  const isFeedError = activeTab === "suggested"
+    ? suggestedPosts.isError
+    : activeFeed.isError;
+
+  const handleRetry = useCallback(() => {
+    if (activeTab === "suggested") {
+      suggestedPosts.refetch();
+    } else {
+      activeFeed.refetch();
+    }
+  }, [activeTab, activeFeed, suggestedPosts]);
+
+  const handleCreatePost = useCallback(async (data: PostCreate) => { await createPost.mutateAsync(data); }, [createPost]);
+  const handleDeletePost = useCallback((postId: string) => {
     deletePost.mutate(postId, {
       onSuccess: () => toast({ title: "Post deleted" }),
       onError: () => toast({ title: "Failed to delete post", variant: "destructive" }),
     });
-  };
-  const handleSavePost = async (postId: string) => { await savePost.mutateAsync(postId); };
-  const handleUnsavePost = async (postId: string) => { await unsavePost.mutateAsync(postId); };
-  const handleHidePost = async (postId: string) => { await hidePost.mutateAsync(postId); };
-  const handleUnhidePost = async (postId: string) => { await unhidePost.mutateAsync(postId); };
-  const handlePinPost = async (postId: string) => { await pinPost.mutateAsync(postId); };
-  const handleUnpinPost = async (postId: string) => { await unpinPost.mutateAsync(postId); };
-  const handleArchivePost = async (postId: string) => { await archivePost.mutateAsync(postId); };
-  const handleUnarchivePost = async (postId: string) => { await unarchivePost.mutateAsync(postId); };
-  const handleVotePoll = async (pollId: string, optionId: string) => { await votePoll.mutateAsync({ pollId, optionId }); };
-  const handleRepostPost = async (postId: string) => { await repostPost.mutateAsync({ postId }); };
-  const handleLikePost = async (postId: string) => { await likePost.mutateAsync(postId); };
-  const handleUnlikePost = async (postId: string) => { await unlikePost.mutateAsync(postId); };
-  const handleEditPost = async (post: { id: string; content?: string | null }) => {
+  }, [deletePost, toast]);
+  const handleSavePost = useCallback(async (postId: string) => { await savePost.mutateAsync(postId); }, [savePost]);
+  const handleUnsavePost = useCallback(async (postId: string) => { await unsavePost.mutateAsync(postId); }, [unsavePost]);
+  const handleHidePost = useCallback(async (postId: string) => { await hidePost.mutateAsync(postId); }, [hidePost]);
+  const handleUnhidePost = useCallback(async (postId: string) => { await unhidePost.mutateAsync(postId); }, [unhidePost]);
+  const handlePinPost = useCallback(async (postId: string) => { await pinPost.mutateAsync(postId); }, [pinPost]);
+  const handleUnpinPost = useCallback(async (postId: string) => { await unpinPost.mutateAsync(postId); }, [unpinPost]);
+  const handleArchivePost = useCallback(async (postId: string) => { await archivePost.mutateAsync(postId); }, [archivePost]);
+  const handleUnarchivePost = useCallback(async (postId: string) => { await unarchivePost.mutateAsync(postId); }, [unarchivePost]);
+  const handleVotePoll = useCallback(async (pollId: string, optionId: string) => { await votePoll.mutateAsync({ pollId, optionId }); }, [votePoll]);
+  const handleRepostPost = useCallback(async (postId: string) => {
+    try {
+      await repostPost.mutateAsync({ postId });
+    } catch (err) {
+      toast({ title: "Failed to repost", description: errorMessage(err), variant: "destructive" });
+    }
+  }, [repostPost, toast]);
+  const handleLikePost = useCallback(async (postId: string) => {
+    try {
+      await likePost.mutateAsync(postId);
+    } catch (err) {
+      toast({ title: "Failed to like", description: errorMessage(err), variant: "destructive" });
+    }
+  }, [likePost, toast]);
+  const handleUnlikePost = useCallback(async (postId: string) => { await unlikePost.mutateAsync(postId); }, [unlikePost]);
+  const handleEditPost = useCallback(async (post: { id: string; content?: string | null }) => {
     await updatePost.mutateAsync({ postId: post.id, data: { content: post.content || "" } });
-  };
-  const handleQuotePost = async (postId: string) => {
+  }, [updatePost]);
+  const handleQuotePost = useCallback(async (postId: string) => {
     setQuoteDialogPostId(postId);
-  };
-  const handleQuoteConfirm = async (quoteText: string) => {
+  }, []);
+  const handleQuoteConfirm = useCallback(async (quoteText: string) => {
     if (quoteDialogPostId) {
       await quotePost.mutateAsync({ postId: quoteDialogPostId, quoteText });
       setQuoteDialogPostId(null);
     }
-  };
-  const handleBlockUser = (userId: string) => {
+  }, [quoteDialogPostId, quotePost]);
+  const handleBlockUser = useCallback((userId: string) => {
     blockUser.mutate(userId, {
       onSuccess: () => {
         toast({ title: "User blocked" });
@@ -159,8 +185,8 @@ export function HomePage() {
       },
       onError: () => toast({ title: "Failed to block user", variant: "destructive" }),
     });
-  };
-  const handleMuteUser = (userId: string) => {
+  }, [blockUser, toast, queryClient]);
+  const handleMuteUser = useCallback((userId: string) => {
     muteUser.mutate(userId, {
       onSuccess: () => {
         toast({ title: "User muted" });
@@ -168,11 +194,11 @@ export function HomePage() {
       },
       onError: () => toast({ title: "Failed to mute user", variant: "destructive" }),
     });
-  };
-  const handleReportPost = (_postId: string) => {
+  }, [muteUser, toast, queryClient]);
+  const handleReportPost = useCallback((_postId: string) => {
     toast({ title: "Report submitted", description: "Thank you for your report." });
-  };
-  const handleFollowUser = (userId: string) => {
+  }, [toast]);
+  const handleFollowUser = useCallback((userId: string) => {
     followUser.mutate(userId, {
       onSuccess: () => {
         toast({ title: "Following" });
@@ -180,8 +206,8 @@ export function HomePage() {
       },
       onError: () => toast({ title: "Failed to follow user", variant: "destructive" }),
     });
-  };
-  const handleAddFriend = (userId: string) => {
+  }, [followUser, toast, queryClient]);
+  const handleAddFriend = useCallback((userId: string) => {
     sendFriendRequest.mutate(userId, {
       onSuccess: () => {
         toast({ title: "Friend request sent" });
@@ -189,8 +215,8 @@ export function HomePage() {
       },
       onError: () => toast({ title: "Failed to send friend request", variant: "destructive" }),
     });
-  };
-  const handleAddCloseFriend = (userId: string) => {
+  }, [sendFriendRequest, toast, queryClient]);
+  const handleAddCloseFriend = useCallback((userId: string) => {
     addCloseFriend.mutate(userId, {
       onSuccess: () => {
         toast({ title: "Added to close friends" });
@@ -198,9 +224,9 @@ export function HomePage() {
       },
       onError: () => toast({ title: "Failed to add close friend", variant: "destructive" }),
     });
-  };
+  }, [addCloseFriend, toast, queryClient]);
 
-  const handleOpenPost = (post: Post) => setSelectedPost(post);
+  const handleOpenPost = useCallback((post: Post) => setSelectedPost(post), []);
 
   const sortedPosts = activeTab === "suggested" ? [] : [...posts].sort((a, b) => {
     if (sortBy === "trending") return b.trending_score - a.trending_score;
@@ -255,7 +281,7 @@ export function HomePage() {
 
           <StoriesRow />
 
-          <CreatePostForm
+          <CreatePostButton
             onSubmit={handleCreatePost as (data: PostCreate) => void}
             isSubmitting={createPost.isPending}
             userAvatar={user?.avatar_url}
@@ -276,9 +302,13 @@ export function HomePage() {
           <FeedTabs activeTab={activeTab} onTabChange={setActiveTab} />
           <FeedFilters sortBy={sortBy} onSortChange={setSortBy} />
 
-          {isLoading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          {isFeedError ? (
+            <ErrorState onRetry={handleRetry} />
+          ) : isLoading ? (
+            <div className="space-y-4">
+              <PostSkeleton />
+              <PostSkeleton />
+              <PostSkeleton />
             </div>
           ) : sortedPosts.length === 0 ? (
             <EmptyFeed feedType={activeTab} />

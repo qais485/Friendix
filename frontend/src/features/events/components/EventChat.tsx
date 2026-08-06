@@ -4,6 +4,7 @@ import { Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEventChat, useSendEventChat } from "../hooks";
 import { formatDistanceToNow } from "@/lib/utils";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { Event, EventChatMessage } from "@/types";
 
 interface EventChatProps {
@@ -64,7 +65,7 @@ export function EventChat({ event }: EventChatProps) {
             >
               {msg.avatar_url ? (
                 <img
-                  src={msg.avatar_url}
+                  src={getCloudinaryTransformedUrl(msg.avatar_url, "avatar")}
                   alt=""
                   width={32}
                   height={32}

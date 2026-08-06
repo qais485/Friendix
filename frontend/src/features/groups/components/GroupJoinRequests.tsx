@@ -3,6 +3,7 @@ import { UserCheck, UserX, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGroupJoinRequests, useHandleJoinRequest } from "../hooks";
 import { formatDistanceToNow } from "@/lib/utils";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { Group } from "@/types";
 
 interface GroupJoinRequestsProps {
@@ -42,7 +43,7 @@ export function GroupJoinRequests({ group }: GroupJoinRequestsProps) {
         >
           {req.avatar_url ? (
             <img
-              src={req.avatar_url}
+              src={getCloudinaryTransformedUrl(req.avatar_url, "avatar")}
               alt=""
               width={40}
               height={40}

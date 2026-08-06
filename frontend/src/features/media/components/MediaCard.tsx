@@ -13,9 +13,9 @@ import {
   Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { cn } from "@/lib/utils";
 import { getMediaDisplayUrl, useSecureMediaUrl } from "@/lib/media";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import { formatFileSize } from "@/utils";
 import type { Media } from "@/types";
 
@@ -64,13 +64,10 @@ export function MediaCard({
       return (
         <div className="relative h-full w-full">
           {imgSrc ? (
-            <img
-              src={getCloudinaryTransformedUrl(imgSrc, "thumbnail")}
+            <OptimizedImage
+              src={imgSrc}
               alt={media.alt_text || media.original_name || "Media"}
-              width={200}
-              height={200}
-              loading="lazy"
-              decoding="async"
+              preset="thumbnail"
               className="h-full w-full object-cover"
             />
           ) : (
@@ -92,13 +89,10 @@ export function MediaCard({
       return (
         <div className="relative h-full w-full bg-black">
           {media.thumbnail_url ? (
-            <img
+            <OptimizedImage
               src={media.thumbnail_url}
               alt="Video thumbnail"
-              width={200}
-              height={200}
-              loading="lazy"
-              decoding="async"
+              preset="full"
               className="h-full w-full object-cover"
             />
           ) : (

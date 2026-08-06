@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import {
   MoreHorizontal,
   Pin,
@@ -118,7 +119,7 @@ export function CommentItem({ comment, currentUserId, postOwnerId, postId, onRep
         <div className="flex-shrink-0">
           {comment.author?.avatar_url ? (
             <img
-              src={comment.author.avatar_url}
+              src={getCloudinaryTransformedUrl(comment.author.avatar_url, "avatar")}
               alt={comment.author.full_name || "User"}
               width={32}
               height={32}

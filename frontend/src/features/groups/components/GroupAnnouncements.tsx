@@ -4,6 +4,7 @@ import { Megaphone, Pin, Loader2, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGroupAnnouncements, useCreateAnnouncement } from "../hooks";
 import { formatDistanceToNow } from "@/lib/utils";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { Group } from "@/types";
 
 interface GroupAnnouncementsProps {
@@ -84,7 +85,7 @@ export function GroupAnnouncements({ group }: GroupAnnouncementsProps) {
             <div className="flex items-center gap-2 mb-2">
               {ann.avatar_url ? (
                 <img
-                  src={ann.avatar_url}
+                  src={getCloudinaryTransformedUrl(ann.avatar_url, "avatar")}
                   alt=""
                   width={24}
                   height={24}

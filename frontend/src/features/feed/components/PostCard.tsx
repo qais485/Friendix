@@ -1,4 +1,5 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, memo, type CSSProperties } from "react";
+import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useIsMutating } from "@tanstack/react-query";
@@ -30,17 +31,54 @@ import {
   UserPlus,
   UserCheck,
   Star,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { sanitizeHtml } from "@/lib/sanitize";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { LazyVideo } from "@/components/ui/LazyVideo";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 import { ParsedContent } from "@/components/ParsedContent";
 import { CommentThread } from "@/features/comments";
 import { LiquidGlassFilter } from "@/components/LiquidGlassFilter";
 import { getPostBackgroundStyle } from "./composer";
+import { useAppearanceSettings, type PostCardBarAppearance } from "@/hooks/useAppearanceSettings";
+import { registerActivePost } from "@/lib/activePost";
 import type { Post } from "@/types";
+
+function barAppearanceClasses(
+  bar: PostCardBarAppearance,
+  position: "header" | "footer"
+): { className: string; style?: CSSProperties } {
+  const rounding = position === "header" ? "rounded-t-lg" : "rounded-b-lg";
+  if (bar.mode === "solid") {
+    return { className: cn(rounding, "overflow-hidden"), style: { backgroundColor: bar.color } };
+  }
+  if (bar.mode === "glass") {
+    return { className: cn("liquid-glass", rounding), style: undefined };
+  }
+  return { className: "", style: undefined };
+}
+
+const DARK_BAR_FG = { strong: "text-white", base: "text-white/90", muted: "text-white/70" };
+const LIGHT_BAR_FG = { strong: "text-black", base: "text-black/90", muted: "text-black/60" };
+
+function rgbaLuminance(hex: string): number {
+  let h = (hex || "#000000").replace("#", "");
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const num = parseInt(h, 16) || 0;
+  const r = (num >> 16) & 255;
+  const g = (num >> 8) & 255;
+  const b = num & 255;
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
+function barForeground(bar: PostCardBarAppearance) {
+  if (bar.mode === "solid") return rgbaLuminance(bar.color) < 0.5 ? DARK_BAR_FG : LIGHT_BAR_FG;
+  return DARK_BAR_FG;
+}
 
 interface PostCardProps {
   post: Post;
@@ -70,7 +108,7 @@ interface PostCardProps {
   onAddCloseFriend?: (userId: string) => void;
 }
 
-export function PostCard({
+export const PostCard = memo(function PostCard({
   post,
   currentUserId,
   unhideMode = false,
@@ -101,9 +139,53 @@ export function PostCard({
   const [showComments, setShowComments] = useState(false);
   const [captionExpanded, setCaptionExpanded] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const menuContentRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const activePostHandle = useRef<ReturnType<typeof registerActivePost> | null>(null);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const [isActivePost, setIsActivePost] = useState(false);
   const isOwner = post.user_id === currentUserId;
 
   const isAnyFeedMutationPending = useIsMutating({ mutationKey: ["feed"] }) > 0;
+
+  const { data: appearance } = useAppearanceSettings();
+
+  // Register this post for visibility-based active detection (video playback).
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const handle = registerActivePost(el);
+    activePostHandle.current = handle;
+    handle.setOnActive((active) => {
+      setIsActivePost(active);
+      if (!active) setVideoEnded(false);
+    });
+    return () => handle.unregister();
+  }, []);
+
+  const handleVideoEnded = useCallback(() => setVideoEnded(true), []);
+
+  const handleVideoReady = useCallback(
+    (video: HTMLVideoElement | null) => {
+      activePostHandle.current?.setVideo(video);
+      if (videoRef.current === video) return;
+      videoRef.current?.removeEventListener("ended", handleVideoEnded);
+      videoRef.current = video;
+      video?.addEventListener("ended", handleVideoEnded);
+      if (video) setVideoEnded(video.ended);
+    },
+    [handleVideoEnded]
+  );
+
+  const handleReplay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = 0;
+    setVideoEnded(false);
+    video.play().catch(() => {});
+  };
 
   const handleCardClick = (e: React.MouseEvent) => {
     if (!onOpenPost) return;
@@ -114,24 +196,45 @@ export function PostCard({
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setShowMenu(false);
-      }
+      const target = e.target as Node;
+      const inside =
+        (menuRef.current && menuRef.current.contains(target)) ||
+        (menuContentRef.current && menuContentRef.current.contains(target));
+      if (!inside) setShowMenu(false);
     };
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && showMenu) {
         setShowMenu(false);
       }
     };
+    const updatePosition = () => {
+      const rect = menuRef.current?.getBoundingClientRect();
+      if (rect) {
+        setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+      }
+    };
     if (showMenu) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("scroll", updatePosition, { passive: true });
+      window.addEventListener("resize", updatePosition);
+      updatePosition();
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", updatePosition);
+      window.removeEventListener("resize", updatePosition);
     };
   }, [showMenu]);
+
+  const handleToggleMenu = () => {
+    const rect = menuRef.current?.getBoundingClientRect();
+    if (rect) {
+      setMenuPos({ top: rect.bottom + 4, right: window.innerWidth - rect.right });
+    }
+    setShowMenu((prev) => !prev);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -175,6 +278,23 @@ export function PostCard({
     !!post.audio_url ||
     !!post.document_name;
 
+  const headerBarAppearance = appearance?.header ?? { mode: "glass", color: "#000000" };
+  const footerBarAppearance = appearance?.footer ?? { mode: "glass", color: "#000000" };
+  const headerBar = barAppearanceClasses(headerBarAppearance, "header");
+  const footerBar = barAppearanceClasses(footerBarAppearance, "footer");
+  const headerFg = barForeground(headerBarAppearance);
+  const footerFg = barForeground(footerBarAppearance);
+
+  const hasExtraContent = !!(
+    post.shared_post ||
+    post.quote_text ||
+    (post.feeling_type && post.feeling_text) ||
+    post.location_name ||
+    post.document_name ||
+    post.audio_url ||
+    post.poll
+  );
+
   const menuContent = (
     <div role="menu" aria-label="Post actions" className="absolute right-0 top-full z-20 mt-1 w-52 overflow-hidden rounded-2xl glass-card p-1.5 shadow-float">
       {isOwner && (
@@ -216,6 +336,7 @@ export function PostCard({
 
   return (
     <motion.div
+      ref={cardRef}
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
@@ -227,10 +348,10 @@ export function PostCard({
     >
       {/* ── Header ─────────────────────────────────────── */}
       <div className={cn(
-        "absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-3 py-2.5",
-        (hasMedia || hasBackground) ? "liquid-glass rounded-t-lg" : ""
-      )}>
-        {(hasMedia || hasBackground) && <LiquidGlassFilter />}
+        "absolute top-0 left-0 right-0 z-20 flex items-center gap-3 px-3 py-2.5",
+        (hasMedia || hasBackground) ? headerBar.className : ""
+      )} style={headerBar.style}>
+        {(hasMedia || hasBackground) && headerBarAppearance.mode === "glass" && <LiquidGlassFilter />}
         <Link to={`/profile/${post.author?.username}`}>
           <Avatar
             src={post.author?.avatar_url}
@@ -245,7 +366,7 @@ export function PostCard({
               to={`/profile/${post.author?.username}`}
               className={cn(
                 "truncate text-[13px] font-semibold hover:underline",
-                (hasMedia || hasBackground) ? "text-white" : ""
+                (hasMedia || hasBackground) ? headerFg.strong : ""
               )}
             >
               {post.author?.full_name || "Unknown"}
@@ -262,7 +383,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className={cn("h-7 w-7 rounded-full hover:text-primary", (hasMedia || hasBackground) ? "text-white/80" : "text-muted-foreground")}
+                className={cn("h-7 w-7 rounded-full hover:bg-transparent hover:backdrop-blur-none active:scale-95", (hasMedia || hasBackground) ? headerFg.base : "text-muted-foreground")}
                 onClick={() => onFollow?.(post.user_id)}
                 aria-label="Follow user"
               >
@@ -271,7 +392,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className={cn("h-7 w-7 rounded-full hover:text-blue-500", (hasMedia || hasBackground) ? "text-white/80" : "text-muted-foreground")}
+                className={cn("h-7 w-7 rounded-full hover:bg-transparent hover:backdrop-blur-none active:scale-95", (hasMedia || hasBackground) ? headerFg.base : "text-muted-foreground")}
                 onClick={() => onAddFriend?.(post.user_id)}
                 aria-label="Add friend"
               >
@@ -280,7 +401,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                className={cn("h-7 w-7 rounded-full hover:text-yellow-500", (hasMedia || hasBackground) ? "text-white/80" : "text-muted-foreground")}
+                className={cn("h-7 w-7 rounded-full hover:bg-transparent hover:backdrop-blur-none active:scale-95", (hasMedia || hasBackground) ? headerFg.base : "text-muted-foreground")}
                 onClick={() => onAddCloseFriend?.(post.user_id)}
                 aria-label="Add to close friends"
               >
@@ -292,16 +413,27 @@ export function PostCard({
             <Button
               variant="ghost"
               size="icon-sm"
-              className={cn("h-7 w-7 rounded-full", (hasMedia || hasBackground) ? "text-white/80" : "")}
-              onClick={() => setShowMenu(!showMenu)}
+              className={cn("h-7 w-7 rounded-full hover:bg-transparent hover:backdrop-blur-none active:scale-95", (hasMedia || hasBackground) ? headerFg.base : "")}
+              onClick={handleToggleMenu}
               aria-label="More options"
               aria-expanded={showMenu}
               aria-haspopup="menu"
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
-            {showMenu && menuContent}
           </div>
+          {showMenu &&
+            menuPos &&
+            createPortal(
+              <div
+                ref={menuContentRef}
+                className="fixed z-[100]"
+                style={{ top: menuPos.top, right: menuPos.right }}
+              >
+                {menuContent}
+              </div>,
+              document.body
+            )}
         </div>
       </div>
 
@@ -336,17 +468,17 @@ export function PostCard({
           )}
 
           {/* ── Footer (overlay on background) ─────── */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 liquid-glass rounded-b-lg">
-            <LiquidGlassFilter />
+      <div className={cn("absolute bottom-0 left-0 right-0 z-20", footerBar.className)} style={footerBar.style}>
+        {footerBarAppearance.mode === "glass" && <LiquidGlassFilter />}
             <div className="flex items-center gap-0.5 px-3 pt-2 pb-1">
               <Button
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-8 gap-1 rounded-full px-2 text-sm",
+                  "h-8 gap-1 rounded-full px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
                   post.is_liked
-                    ? "text-red-500 hover:text-red-600"
-                    : "text-white/90 hover:text-red-500"
+                    ? "text-red-500"
+                    : footerFg.base
                 )}
                 onClick={() => post.is_liked ? onUnlike?.(post.id) : onLike?.(post.id)}
                 disabled={isAnyFeedMutationPending}
@@ -358,7 +490,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1 rounded-full px-2 text-sm text-white/90 hover:text-primary"
+                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => setShowComments(!showComments)}
                 aria-label="Comments"
                 aria-expanded={showComments}
@@ -369,7 +501,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1 rounded-full px-2 text-sm text-white/90 hover:text-green-500"
+                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onRepost?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label="Repost"
@@ -380,7 +512,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1 rounded-full px-2 text-sm text-white/90 hover:text-foreground"
+                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onQuote?.(post.id)}
                 aria-label="Quote post"
               >
@@ -390,7 +522,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-full p-2 text-white/90"
+                className={`h-8 rounded-full p-2 ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => post.is_saved ? onUnsave?.(post.id) : onSave?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label={post.is_saved ? "Unsave post" : "Save post"}
@@ -403,7 +535,7 @@ export function PostCard({
               </Button>
             </div>
             <div className="px-3 pb-1">
-              <span className="text-[11px] text-white/70">
+              <span className={`text-[11px] ${footerFg.muted}`}>
                 {formatDate(post.created_at)}
                 {post.is_pinned && (
                   <span className="ml-1.5 inline-flex items-center gap-0.5 font-medium text-primary">
@@ -427,13 +559,10 @@ export function PostCard({
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-black sm:aspect-[4/5]">
           {/* Single image */}
           {imageUrls.length === 1 && !post.video_url && !post.gif_url && (
-            <img
-              src={getCloudinaryTransformedUrl(imageUrls[0].trim(), "feed")}
+            <OptimizedImage
+              src={imageUrls[0].trim()}
               alt="Post image"
-              width={940}
-              height={1175}
-              loading="lazy"
-              decoding="async"
+              preset="feed"
               className="h-full w-full object-cover"
             />
           )}
@@ -442,14 +571,11 @@ export function PostCard({
           {imageUrls.length > 1 && (
             <div className="grid h-full grid-cols-2 gap-px">
               {imageUrls.map((url, index) => (
-                <img
+                <OptimizedImage
                   key={index}
-                  src={getCloudinaryTransformedUrl(url.trim(), "feed")}
+                  src={url.trim()}
                   alt={`Post image ${index + 1}`}
-                  width={470}
-                  height={588}
-                  loading="lazy"
-                  decoding="async"
+                  preset="feed"
                   className="h-full w-full object-cover"
                 />
               ))}
@@ -459,42 +585,48 @@ export function PostCard({
           {/* Video */}
           {post.video_url && imageUrls.length === 0 && !post.gif_url && (
             <div className="absolute inset-0 bg-black">
-              <video
-                controls
-                preload="metadata"
+              <LazyVideo
                 className="h-full w-full object-cover"
                 src={post.video_url}
-              >
-                Your browser does not support the video tag.
-              </video>
+                poster={getVideoPosterUrl(post.video_url)}
+                onReady={handleVideoReady}
+              />
+{videoEnded && isActivePost && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30">
+                  <button
+                    onClick={handleReplay}
+                    className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all hover:bg-white/30 active:scale-95"
+                    aria-label="Replay video"
+                  >
+                    <RotateCcw className="h-7 w-7" />
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
           {/* GIF */}
           {post.gif_url && imageUrls.length === 0 && !post.video_url && (
-            <img
+            <OptimizedImage
               src={post.gif_url}
               alt="GIF"
-              width={940}
-              height={1175}
-              loading="lazy"
-              decoding="async"
+              preset="full"
               className="h-full w-full object-cover"
             />
           )}
 
-          {/* ── Footer (overlay on image) ───────────── */}
-          <div className="absolute bottom-0 left-0 right-0 z-10 liquid-glass rounded-b-lg">
-            <LiquidGlassFilter />
+          {/* ── Footer + Caption (single glass block) ── */}
+      <div className={cn("absolute bottom-0 left-0 right-0 z-20", footerBar.className)} style={footerBar.style}>
+        {footerBarAppearance.mode === "glass" && <LiquidGlassFilter />}
             <div className="flex items-center gap-0.5 px-3 pt-2 pb-1">
               <Button
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-8 gap-1 rounded-full px-2 text-sm",
+                  "h-8 gap-1 rounded-full px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
                   post.is_liked
-                    ? "text-red-500 hover:text-red-600"
-                    : "text-white/90 hover:text-red-500"
+                    ? "text-red-500"
+                    : footerFg.base
                 )}
                 onClick={() => post.is_liked ? onUnlike?.(post.id) : onLike?.(post.id)}
                 disabled={isAnyFeedMutationPending}
@@ -506,7 +638,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1 rounded-full px-2 text-sm text-white/90 hover:text-primary"
+                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => setShowComments(!showComments)}
                 aria-label="Comments"
                 aria-expanded={showComments}
@@ -517,7 +649,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1 rounded-full px-2 text-sm text-white/90 hover:text-green-500"
+                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onRepost?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label="Repost"
@@ -528,7 +660,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 gap-1 rounded-full px-2 text-sm text-white/90 hover:text-foreground"
+                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onQuote?.(post.id)}
                 aria-label="Quote post"
               >
@@ -538,7 +670,7 @@ export function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 rounded-full p-2 text-white/90"
+                className={`h-8 rounded-full p-2 ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => post.is_saved ? onUnsave?.(post.id) : onSave?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label={post.is_saved ? "Unsave post" : "Save post"}
@@ -551,7 +683,7 @@ export function PostCard({
               </Button>
             </div>
             <div className="px-3 pb-1">
-              <span className="text-[11px] text-white/70">
+              <span className={`text-[11px] ${footerFg.muted}`}>
                 {formatDate(post.created_at)}
                 {post.is_pinned && (
                   <span className="ml-1.5 inline-flex items-center gap-0.5 font-medium text-primary">
@@ -566,13 +698,48 @@ export function PostCard({
                 )}
               </span>
             </div>
+            {post.content && !hasBackground && (
+              <div className="px-3 pt-1">
+                <div className={`text-[13px] leading-snug ${footerFg.base}`}>
+                  {post.content.includes("<") ? (
+                    captionExpanded ? (
+                      <div
+                        className="prose prose-sm max-w-none [&_p]:m-0 [&_p]:mb-1 [&_p:last-child]:mb-0"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
+                      />
+                    ) : (
+                      <div
+                        className="line-clamp-2 prose prose-sm max-w-none [&_p]:m-0"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
+                      />
+                    )
+                  ) : captionExpanded ? (
+                    <p className="whitespace-pre-wrap">
+                      <ParsedContent content={post.content} />
+                    </p>
+                  ) : (
+                    <p className="line-clamp-2 whitespace-pre-wrap">
+                      <ParsedContent content={post.content} />
+                    </p>
+                  )}
+                  {!captionExpanded && post.content.length > 100 && (
+                    <button
+                      onClick={() => setCaptionExpanded(true)}
+                      className={`ml-1 text-sm font-semibold ${footerFg.muted}`}
+                    >
+                      more
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
       {/* ── Content section (text posts, reposts, etc.) ─ */}
-      {!hasBackground && (
-        <div className="space-y-2 px-3 pt-2">
+      {!hasBackground && hasExtraContent && (
+        <div className={cn("space-y-2 px-3", !hasMedia && "pt-[42px]")}>
           {/* Repost header */}
           {post.shared_post && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -594,13 +761,10 @@ export function PostCard({
               )}
               {post.shared_post.image_urls && post.shared_post.image_urls.length > 0 && (
                 <div className="mt-2 overflow-hidden rounded-lg">
-                  <img
+                  <OptimizedImage
                     src={post.shared_post.image_urls[0].trim()}
                     alt="Shared post image"
-                    width={470}
-                    height={264}
-                    loading="lazy"
-                    decoding="async"
+                    preset="feed"
                     className="w-full object-cover"
                   />
                 </div>
@@ -717,16 +881,16 @@ export function PostCard({
 
       {/* ── Footer (text-only posts) ──────────────────── */}
       {!hasBackground && !hasMedia && (
-        <div>
+        <div className="pt-[42px]">
           <div className="flex items-center gap-0.5 px-3 pt-2 pb-1">
             <Button
               variant="ghost"
               size="sm"
               className={cn(
-                "h-8 gap-1 rounded-full px-2 text-sm",
+                "h-8 gap-1 rounded-full px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
                 post.is_liked
-                  ? "text-red-500 hover:text-red-600"
-                  : "text-muted-foreground hover:text-red-500"
+                  ? "text-red-500"
+                  : "text-muted-foreground"
               )}
               onClick={() => post.is_liked ? onUnlike?.(post.id) : onLike?.(post.id)}
               disabled={isAnyFeedMutationPending}
@@ -738,7 +902,7 @@ export function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:text-primary"
+              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => setShowComments(!showComments)}
               aria-label="Comments"
               aria-expanded={showComments}
@@ -749,7 +913,7 @@ export function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:text-green-500"
+              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => onRepost?.(post.id)}
               disabled={isAnyFeedMutationPending}
               aria-label="Repost"
@@ -760,7 +924,7 @@ export function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:text-foreground"
+              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => onQuote?.(post.id)}
               aria-label="Quote post"
             >
@@ -770,7 +934,7 @@ export function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 rounded-full p-2"
+              className="h-8 rounded-full p-2 hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => post.is_saved ? onUnsave?.(post.id) : onSave?.(post.id)}
               disabled={isAnyFeedMutationPending}
               aria-label={post.is_saved ? "Unsave post" : "Save post"}
@@ -801,8 +965,8 @@ export function PostCard({
         </div>
       )}
 
-      {/* ── Caption ──────────────────────────────────── */}
-      {post.content && !hasBackground && (
+      {/* ── Caption (text-only posts) ──────────────────── */}
+      {!hasBackground && !hasMedia && post.content && (
         <div className="px-3 pb-2">
           <div className="text-[13px] leading-snug">
             {post.content.includes("<") ? (
@@ -846,4 +1010,4 @@ export function PostCard({
       )}
     </motion.div>
   );
-}
+});

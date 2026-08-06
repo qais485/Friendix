@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user_id
@@ -77,37 +77,41 @@ def get_post(
 @router.get("/home", response_model=FeedResponse)
 def get_home_feed(
     cursor: str | None = None,
+    limit: int = Query(10, ge=1, le=20),
     user_id: UUID = Depends(get_current_user_id),
     service: FeedService = Depends(get_feed_service),
 ):
-    return service.get_home_feed(user_id, cursor)
+    return service.get_home_feed(user_id, cursor, limit=limit)
 
 
 @router.get("/following", response_model=FeedResponse)
 def get_following_feed(
     cursor: str | None = None,
+    limit: int = Query(10, ge=1, le=20),
     user_id: UUID = Depends(get_current_user_id),
     service: FeedService = Depends(get_feed_service),
 ):
-    return service.get_following_feed(user_id, cursor)
+    return service.get_following_feed(user_id, cursor, limit=limit)
 
 
 @router.get("/friends", response_model=FeedResponse)
 def get_friends_feed(
     cursor: str | None = None,
+    limit: int = Query(10, ge=1, le=20),
     user_id: UUID = Depends(get_current_user_id),
     service: FeedService = Depends(get_feed_service),
 ):
-    return service.get_friends_feed(user_id, cursor)
+    return service.get_friends_feed(user_id, cursor, limit=limit)
 
 
 @router.get("/trending", response_model=FeedResponse)
 def get_trending_feed(
     cursor: str | None = None,
+    limit: int = Query(10, ge=1, le=20),
     user_id: UUID = Depends(get_current_user_id),
     service: FeedService = Depends(get_feed_service),
 ):
-    return service.get_trending_feed(user_id, cursor)
+    return service.get_trending_feed(user_id, cursor, limit=limit)
 
 
 @router.get("/suggested", response_model=list[PostResponse])
@@ -122,10 +126,11 @@ def get_suggested_posts(
 def get_user_posts(
     target_user_id: str,
     cursor: str | None = None,
+    limit: int = Query(10, ge=1, le=20),
     user_id: UUID = Depends(get_current_user_id),
     service: FeedService = Depends(get_feed_service),
 ):
-    return service.get_user_posts(UUID(target_user_id), user_id, cursor)
+    return service.get_user_posts(UUID(target_user_id), user_id, cursor, limit=limit)
 
 
 @router.post("/posts/{post_id}/save")

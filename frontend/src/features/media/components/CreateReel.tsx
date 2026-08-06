@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Film, Globe, Users, Lock, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 import { UploadZone } from "./UploadZone";
 import { useCreateReel, useUploadMedia } from "../hooks";
 import { useToast } from "@/hooks/useToast";
@@ -147,6 +148,7 @@ export function CreateReel({ onClose, onCreated }: CreateReelProps) {
                 <div className="relative overflow-hidden rounded-xl bg-black">
                   <video
                     src={previewUrl}
+                    poster={getVideoPosterUrl(previewUrl)}
                     className="w-full max-h-[300px] object-contain"
                     controls
                     muted

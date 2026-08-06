@@ -272,6 +272,15 @@ class MediaRepository:
     def get_story_viewers(self, story_id: UUID) -> list[StoryView]:
         return self.db.query(StoryView).filter(StoryView.story_id == story_id).all()
 
+    def get_viewed_story_ids(self, story_ids: list[UUID], viewer_id: UUID) -> set[UUID]:
+        if not story_ids:
+            return set()
+        rows = self.db.query(StoryView.story_id).filter(
+            StoryView.story_id.in_(story_ids),
+            StoryView.user_id == viewer_id,
+        ).all()
+        return {r[0] for r in rows}
+
     def delete_story(self, story: Story) -> None:
         self.db.delete(story)
         self.db.commit()

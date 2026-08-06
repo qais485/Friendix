@@ -2,7 +2,7 @@ from uuid import UUID
 import logging
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
-from app.repositories.feed_repository import FeedRepository
+from app.repositories.feed_repository import FeedRepository, encode_cursor, encode_trending_cursor
 from app.repositories.profile_repository import ProfileRepository
 from app.repositories.hashtag_repository import HashtagRepository
 from app.services.notification_service import NotificationService
@@ -57,7 +57,14 @@ class FeedService:
             is_expired=is_expired,
         )
 
-    def _enrich_post(self, post, user_id: UUID, users_map: dict = None) -> PostResponse:
+    def _enrich_post(
+        self,
+        post,
+        user_id: UUID,
+        users_map: dict = None,
+        liked_ids: set = None,
+        saved_ids: set = None,
+    ) -> PostResponse:
         if users_map is None:
             author = self.profile_repo.get_by_id(post.user_id)
         else:
@@ -115,8 +122,16 @@ class FeedService:
             author=author_data,
             shared_post=shared_post_data,
             poll=poll_data,
-            is_liked=self.feed_repo.is_post_liked(user_id, post.id),
-            is_saved=self.feed_repo.is_post_saved(user_id, post.id),
+            is_liked=(
+                post.id in liked_ids
+                if liked_ids is not None
+                else self.feed_repo.is_post_liked(user_id, post.id)
+            ),
+            is_saved=(
+                post.id in saved_ids
+                if saved_ids is not None
+                else self.feed_repo.is_post_saved(user_id, post.id)
+            ),
             created_at=post.created_at,
             updated_at=post.updated_at,
         )
@@ -128,7 +143,19 @@ class FeedService:
             if post.shared_post:
                 all_user_ids.add(post.shared_post.user_id)
         users_map = self.profile_repo.get_by_ids(list(all_user_ids))
-        return [self._enrich_post(p, user_id, users_map) for p in posts]
+        post_ids = [post.id for post in posts]
+        liked_ids = self.feed_repo.get_liked_post_ids(user_id, post_ids)
+        saved_ids = self.feed_repo.get_saved_post_ids(user_id, post_ids)
+        return [
+            self._enrich_post(p, user_id, users_map, liked_ids, saved_ids)
+            for p in posts
+        ]
+
+    def _next_post_cursor(self, posts, has_more: bool) -> str | None:
+        if not posts or not has_more:
+            return None
+        last = posts[-1]
+        return encode_cursor(last.is_pinned, last.created_at, last.id)
 
     def create_post(self, user_id: UUID, data: PostCreate) -> PostResponse:
         kwargs = {}
@@ -342,56 +369,48 @@ class FeedService:
             except Exception as e:
                 logger.warning("Failed to delete thumbnail %s: %s", thumb_path, e)
 
-    def get_home_feed(self, user_id: UUID, cursor: str | None = None) -> FeedResponse:
-        limit = 20
-        cursor_uuid = UUID(cursor) if cursor else None
-        posts = self.feed_repo.get_home_feed(user_id, cursor_uuid, limit=limit)
+    def get_home_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> FeedResponse:
+        posts = self.feed_repo.get_home_feed(user_id, cursor, limit=limit)
         has_more = len(posts) > limit
         if has_more:
             posts = posts[:limit]
-        next_cursor = str(posts[-1].id) if posts and has_more else None
         return FeedResponse(
             posts=self._enrich_posts_batch(posts, user_id),
-            next_cursor=next_cursor,
+            next_cursor=self._next_post_cursor(posts, has_more),
             has_more=has_more,
         )
 
-    def get_following_feed(self, user_id: UUID, cursor: str | None = None) -> FeedResponse:
-        limit = 20
-        cursor_uuid = UUID(cursor) if cursor else None
-        posts = self.feed_repo.get_following_feed(user_id, cursor_uuid, limit=limit)
+    def get_following_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> FeedResponse:
+        posts = self.feed_repo.get_following_feed(user_id, cursor, limit=limit)
         has_more = len(posts) > limit
         if has_more:
             posts = posts[:limit]
-        next_cursor = str(posts[-1].id) if posts and has_more else None
         return FeedResponse(
             posts=self._enrich_posts_batch(posts, user_id),
-            next_cursor=next_cursor,
+            next_cursor=self._next_post_cursor(posts, has_more),
             has_more=has_more,
         )
 
-    def get_friends_feed(self, user_id: UUID, cursor: str | None = None) -> FeedResponse:
-        limit = 20
-        cursor_uuid = UUID(cursor) if cursor else None
-        posts = self.feed_repo.get_friends_feed(user_id, cursor_uuid, limit=limit)
+    def get_friends_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> FeedResponse:
+        posts = self.feed_repo.get_friends_feed(user_id, cursor, limit=limit)
         has_more = len(posts) > limit
         if has_more:
             posts = posts[:limit]
-        next_cursor = str(posts[-1].id) if posts and has_more else None
         return FeedResponse(
             posts=self._enrich_posts_batch(posts, user_id),
-            next_cursor=next_cursor,
+            next_cursor=self._next_post_cursor(posts, has_more),
             has_more=has_more,
         )
 
-    def get_trending_feed(self, user_id: UUID, cursor: str | None = None) -> FeedResponse:
-        limit = 20
-        cursor_uuid = UUID(cursor) if cursor else None
-        posts = self.feed_repo.get_trending_feed(user_id, cursor_uuid, limit=limit)
+    def get_trending_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> FeedResponse:
+        posts = self.feed_repo.get_trending_feed(user_id, cursor, limit=limit)
         has_more = len(posts) > limit
         if has_more:
             posts = posts[:limit]
-        next_cursor = str(posts[-1].id) if posts and has_more else None
+        next_cursor = None
+        if posts and has_more:
+            last = posts[-1]
+            next_cursor = encode_trending_cursor(last.trending_score, last.created_at, last.id)
         return FeedResponse(
             posts=self._enrich_posts_batch(posts, user_id),
             next_cursor=next_cursor,
@@ -402,17 +421,14 @@ class FeedService:
         posts = self.feed_repo.get_suggested_posts(user_id)
         return self._enrich_posts_batch(posts, user_id)
 
-    def get_user_posts(self, user_id: UUID, viewer_id: UUID, cursor: str | None = None) -> FeedResponse:
-        limit = 20
-        cursor_uuid = UUID(cursor) if cursor else None
-        posts = self.feed_repo.get_user_posts(user_id, viewer_id, cursor_uuid, limit=limit)
+    def get_user_posts(self, user_id: UUID, viewer_id: UUID, cursor: str | None = None, limit: int = 10) -> FeedResponse:
+        posts = self.feed_repo.get_user_posts(user_id, viewer_id, cursor, limit=limit)
         has_more = len(posts) > limit
         if has_more:
             posts = posts[:limit]
-        next_cursor = str(posts[-1].id) if posts and has_more else None
         return FeedResponse(
             posts=self._enrich_posts_batch(posts, viewer_id),
-            next_cursor=next_cursor,
+            next_cursor=self._next_post_cursor(posts, has_more),
             has_more=has_more,
         )
 

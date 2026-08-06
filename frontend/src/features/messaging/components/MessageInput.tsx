@@ -11,6 +11,7 @@ import {
   StopCircle,
 } from "lucide-react";
 import { useMessagingStore } from "@/store/messagingStore";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { useUploadMedia } from "../hooks";
 
 const EMOJI_GRID = [
@@ -210,12 +211,10 @@ export function MessageInput({ onSendMessage, replyTo, onClearReply, conversatio
             className="mb-2 relative inline-block"
           >
             {pendingFile.preview ? (
-              <img
+              <OptimizedImage
                 src={pendingFile.preview}
                 alt="Preview"
-                width={96}
-                height={96}
-                decoding="async"
+                preset="full"
                 className="h-24 rounded-lg object-cover"
               />
             ) : (

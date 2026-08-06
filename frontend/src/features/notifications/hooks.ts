@@ -8,6 +8,7 @@ export function useNotifications(cursor?: string) {
       const { data } = await notificationApi.getNotifications(cursor);
       return data;
     },
+    staleTime: 0,
   });
 }
 
@@ -19,6 +20,7 @@ export function useUnreadCount() {
       return data;
     },
     refetchInterval: 30000,
+    staleTime: 0,
   });
 }
 

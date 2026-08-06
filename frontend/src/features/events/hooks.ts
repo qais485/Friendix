@@ -156,6 +156,7 @@ export function useEventChat(id: string) {
     },
     enabled: id.length > 0,
     refetchInterval: 5000,
+    staleTime: 0,
   });
 }
 

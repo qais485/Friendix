@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Globe, Lock, EyeOff, Users } from "lucide-react";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { Group } from "@/types";
 
 interface GroupCardProps {
@@ -26,8 +27,12 @@ export function GroupCard({ group, index = 0 }: GroupCardProps) {
         <div className="flex items-start gap-4">
           {group.cover_url ? (
             <img
-              src={group.cover_url}
+              src={getCloudinaryTransformedUrl(group.cover_url, "thumbnail")}
               alt=""
+              width={56}
+              height={56}
+              loading="lazy"
+              decoding="async"
               className="h-14 w-14 shrink-0 rounded-xl object-cover"
             />
           ) : (

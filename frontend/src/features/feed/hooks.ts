@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery, keepPreviousData } from "@tanstack/react-query";
 import { feedApi } from "@/services/feedApi";
 import { useUploadMedia } from "@/features/media/hooks";
 import { uploadToCloudinary } from "@/lib/cloudinary";
@@ -14,7 +14,7 @@ function updatePostInInfiniteCache(
   updater: (post: Post) => Post
 ) {
   queryClient.setQueriesData({ queryKey: queryKeyBase }, (old: InfiniteData<FeedResponse> | undefined) => {
-    if (!old) return old;
+    if (!old || !Array.isArray(old.pages)) return old;
     return {
       ...old,
       pages: old.pages.map((page: FeedResponse) => ({
@@ -82,12 +82,14 @@ export function useHomeFeed(userId: string | undefined) {
   return useInfiniteQuery({
     queryKey: ["feed", "home", userId],
     queryFn: async ({ pageParam }) => {
-      const { data } = await feedApi.getHomeFeed(pageParam);
+      const { data } = await feedApi.getHomeFeed(pageParam, 10);
       return data;
     },
-    getNextPageParam: (lastPage: FeedResponse) => lastPage.next_cursor ?? undefined,
+    getNextPageParam: (lastPage: FeedResponse) => (lastPage.has_more ? lastPage.next_cursor : undefined),
     initialPageParam: undefined as string | undefined,
     enabled: !!userId,
+    staleTime: 300_000,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -95,12 +97,14 @@ export function useFollowingFeed(userId: string | undefined) {
   return useInfiniteQuery({
     queryKey: ["feed", "following", userId],
     queryFn: async ({ pageParam }) => {
-      const { data } = await feedApi.getFollowingFeed(pageParam);
+      const { data } = await feedApi.getFollowingFeed(pageParam, 10);
       return data;
     },
-    getNextPageParam: (lastPage: FeedResponse) => lastPage.next_cursor ?? undefined,
+    getNextPageParam: (lastPage: FeedResponse) => (lastPage.has_more ? lastPage.next_cursor : undefined),
     initialPageParam: undefined as string | undefined,
     enabled: !!userId,
+    staleTime: 300_000,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -108,12 +112,14 @@ export function useFriendsFeed(userId: string | undefined) {
   return useInfiniteQuery({
     queryKey: ["feed", "friends", userId],
     queryFn: async ({ pageParam }) => {
-      const { data } = await feedApi.getFriendsFeed(pageParam);
+      const { data } = await feedApi.getFriendsFeed(pageParam, 10);
       return data;
     },
-    getNextPageParam: (lastPage: FeedResponse) => lastPage.next_cursor ?? undefined,
+    getNextPageParam: (lastPage: FeedResponse) => (lastPage.has_more ? lastPage.next_cursor : undefined),
     initialPageParam: undefined as string | undefined,
     enabled: !!userId,
+    staleTime: 300_000,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -121,12 +127,14 @@ export function useTrendingFeed(userId: string | undefined) {
   return useInfiniteQuery({
     queryKey: ["feed", "trending", userId],
     queryFn: async ({ pageParam }) => {
-      const { data } = await feedApi.getTrendingFeed(pageParam);
+      const { data } = await feedApi.getTrendingFeed(pageParam, 10);
       return data;
     },
-    getNextPageParam: (lastPage: FeedResponse) => lastPage.next_cursor ?? undefined,
+    getNextPageParam: (lastPage: FeedResponse) => (lastPage.has_more ? lastPage.next_cursor : undefined),
     initialPageParam: undefined as string | undefined,
     enabled: !!userId,
+    staleTime: 300_000,
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -138,6 +146,7 @@ export function useSuggestedPosts(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -145,12 +154,13 @@ export function useUserPosts(userId: string | undefined, targetUserId: string | 
   return useInfiniteQuery({
     queryKey: ["feed", "user", userId, targetUserId],
     queryFn: async ({ pageParam }) => {
-      const { data } = await feedApi.getUserPosts(targetUserId!, pageParam);
+      const { data } = await feedApi.getUserPosts(targetUserId!, pageParam, 10);
       return data;
     },
-    getNextPageParam: (lastPage: FeedResponse) => lastPage.next_cursor ?? undefined,
+    getNextPageParam: (lastPage: FeedResponse) => (lastPage.has_more ? lastPage.next_cursor : undefined),
     initialPageParam: undefined as string | undefined,
     enabled: !!userId && !!targetUserId,
+    staleTime: 120_000,
   });
 }
 
@@ -162,6 +172,7 @@ export function useSavedPosts(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -173,6 +184,7 @@ export function useHiddenPosts(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -184,6 +196,7 @@ export function useArchivedPosts(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -195,6 +208,7 @@ export function useDraftPosts(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -206,6 +220,7 @@ export function useScheduledPosts(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -272,8 +287,8 @@ export function useDeletePost() {
 
       try {
         queryClient.setQueriesData({ queryKey: ["feed"] }, (old: InfiniteData<FeedResponse> | undefined) => {
-          if (!old) return old;
-          return {
+          if (!old || !Array.isArray(old.pages)) return old;
+        return {
             ...old,
             pages: old.pages.map((page: FeedResponse) => ({
               ...page,
@@ -441,7 +456,7 @@ export function usePinPost() {
 
       // Unpin all other posts first, then pin this one
       queryClient.setQueriesData({ queryKey: ["feed"] }, (old: InfiniteData<FeedResponse> | undefined) => {
-        if (!old) return old;
+        if (!old || !Array.isArray(old.pages)) return old;
         return {
           ...old,
           pages: old.pages.map((page: FeedResponse) => ({
@@ -580,7 +595,7 @@ export function useVotePoll() {
       const previous = queryClient.getQueriesData({ queryKey: ["feed"] });
 
       queryClient.setQueriesData({ queryKey: ["feed"] }, (old: InfiniteData<FeedResponse> | undefined) => {
-        if (!old) return old;
+        if (!old || !Array.isArray(old.pages)) return old;
         return {
           ...old,
           pages: old.pages.map((page: FeedResponse) => ({

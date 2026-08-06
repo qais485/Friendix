@@ -11,6 +11,7 @@ import {
   X,
   User,
 } from "lucide-react";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 interface CallModalProps {
   isOpen: boolean;
@@ -203,12 +204,11 @@ export function CallModal({
           <div className="mb-6 flex flex-col items-center">
             <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full bg-primary/10">
               {recipientAvatar ? (
-                <img
+                <OptimizedImage
                   src={recipientAvatar}
                   alt={recipientName}
-                  width={96}
-                  height={96}
-                  decoding="async"
+                  preset="avatar"
+                  eager
                   className="h-24 w-24 rounded-full object-cover"
                 />
               ) : (

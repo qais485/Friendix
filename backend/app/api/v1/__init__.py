@@ -16,6 +16,12 @@ from app.api.v1.groups import router as groups_router
 from app.api.v1.events import router as events_router
 from app.api.v1.videos import router as videos_router
 from app.api.v1.analytics import router as analytics_router
+from app.api.v1.event_tracking import router as event_tracking_router
+from app.api.v1.interests import router as interests_router
+from app.api.v1.content_profiles import router as content_profiles_router
+from app.api.v1.ranking import router as ranking_router
+from app.api.v1.recommendations import router as recommendations_router
+from app.api.v1.settings import router as settings_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
@@ -35,3 +41,9 @@ api_router.include_router(groups_router, prefix="/groups", tags=["Groups"])
 api_router.include_router(events_router, prefix="/events", tags=["Events"])
 api_router.include_router(videos_router, prefix="/videos", tags=["Videos"])
 api_router.include_router(analytics_router, prefix="/analytics", tags=["Analytics"])
+api_router.include_router(event_tracking_router, prefix="/tracking", tags=["Event Tracking"])
+api_router.include_router(interests_router, prefix="/interests", tags=["User Interests"])
+api_router.include_router(content_profiles_router, prefix="/content-profiles", tags=["Content Profiles"])
+api_router.include_router(ranking_router, prefix="/ranking", tags=["Ranking"])
+api_router.include_router(recommendations_router, prefix="/recommendations", tags=["Recommendations"])
+api_router.include_router(settings_router, prefix="", tags=["Settings"])

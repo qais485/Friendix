@@ -5,9 +5,9 @@ import {
   ArrowLeft, ThumbsUp, Clock, ListPlus, Eye, Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { VideoPlayer } from "./components/VideoPlayer";
 import { VideoComments } from "./components/VideoComments";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import {
   useVideoDetail, useToggleVideoLike, useToggleWatchLater,
   useRecordWatch, useRecommendations, useAddVideoToPlaylist, useUserPlaylists,
@@ -193,13 +193,10 @@ export function WatchPage() {
                     >
                       <div className="relative w-40 shrink-0 overflow-hidden rounded-lg bg-muted shadow-card">
                         {rec.thumbnail_url ? (
-                          <img
-                            src={getCloudinaryTransformedUrl(rec.thumbnail_url, "thumbnail")}
+                          <OptimizedImage
+                            src={rec.thumbnail_url}
                             alt=""
-                            width={160}
-                            height={90}
-                            loading="lazy"
-                            decoding="async"
+                            preset="thumbnail"
                             className="aspect-video w-full object-cover"
                           />
                         ) : (

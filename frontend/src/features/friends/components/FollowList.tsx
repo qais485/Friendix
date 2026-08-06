@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { UserPlus, UserMinus, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { FollowUser } from "@/types";
 
 interface FollowListProps {
@@ -54,7 +55,7 @@ export function FollowList({ users, isLoading, type, onFollow, onUnfollow, isPro
             <div className="flex items-center gap-3">
               {user.avatar_url ? (
                 <img
-                  src={user.avatar_url}
+                  src={getCloudinaryTransformedUrl(user.avatar_url, "avatar")}
                   alt={user.full_name || "User"}
                   width={48}
                   height={48}

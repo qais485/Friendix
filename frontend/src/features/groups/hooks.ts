@@ -262,6 +262,7 @@ export function useGroupMessages(slug: string) {
     },
     enabled: slug.length > 0,
     refetchInterval: 5000,
+    staleTime: 0,
   });
 }
 

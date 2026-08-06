@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useEventAttendees } from "../hooks";
 import { useRelationshipSummary, useSendFriendRequest } from "@/features/friends/hooks";
 import { useToast } from "@/hooks/useToast";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 
 interface EventAttendeesProps {
   eventId: string;
@@ -61,7 +62,7 @@ function EventAttendeeItem({ attendee, index }: { attendee: any; index: number }
       <Link to={`/profile/${attendee.username}`}>
         {attendee.avatar_url ? (
           <img
-            src={attendee.avatar_url}
+            src={getCloudinaryTransformedUrl(attendee.avatar_url, "avatar")}
             alt=""
             width={40}
             height={40}

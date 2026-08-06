@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { SystemSetting } from "@/types";
 
-const CATEGORIES = ["", "general", "auth", "moderation", "notifications"] as const;
+const CATEGORIES = ["", "general", "auth", "moderation", "notifications", "appearance"] as const;
 
 export function SystemSettingsView() {
   const queryClient = useQueryClient();

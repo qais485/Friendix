@@ -11,6 +11,7 @@ export function useVideoCategories() {
       const { data } = await videoApi.getCategories();
       return data;
     },
+    staleTime: 300_000,
   });
 }
 

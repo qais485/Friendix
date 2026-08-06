@@ -16,6 +16,7 @@ import {
   Eraser,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 interface ImageEditorProps {
   imageUrl: string;
@@ -163,12 +164,11 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
       <div className="flex flex-1 overflow-hidden">
         <div className="flex flex-1 items-center justify-center p-4">
           <div className="relative overflow-hidden rounded-lg bg-[conic-gradient(from_0deg,#ccc_0 90deg,#999_90deg_180deg,#ccc_180deg_270deg,#999_270deg)]">
-            <img
+            <OptimizedImage
               src={imageUrl}
               alt="Editing"
-              width={800}
-              height={600}
-              decoding="async"
+              preset="full"
+              eager
               className="max-h-[70vh] max-w-full object-contain"
               style={{
                 transform: `rotate(${editState.rotation}deg) scale(${editState.scale}) scaleX(${editState.flipX ? -1 : 1}) scaleY(${editState.flipY ? -1 : 1})`,

@@ -4,6 +4,7 @@ import { Send, Loader2, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGroupMessages, useSendGroupMessage } from "../hooks";
 import { formatDistanceToNow } from "@/lib/utils";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { Group, GroupMessage } from "@/types";
 
 interface GroupChatProps {
@@ -60,7 +61,7 @@ export function GroupChat({ group }: GroupChatProps) {
             >
               {msg.avatar_url ? (
                 <img
-                  src={msg.avatar_url}
+                  src={getCloudinaryTransformedUrl(msg.avatar_url, "avatar")}
                   alt=""
                   width={32}
                   height={32}

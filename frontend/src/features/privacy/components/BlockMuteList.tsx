@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { BlockedUser, BlockType } from "@/types";
 
 interface BlockMuteListProps {
@@ -50,7 +51,7 @@ export function BlockMuteList({ users, type, isLoading, onRemove, isRemoving }: 
             <div className="flex items-center gap-3">
               {user.avatar_url ? (
                 <img
-                  src={user.avatar_url}
+                  src={getCloudinaryTransformedUrl(user.avatar_url, "avatar")}
                   alt={user.full_name || "User"}
                   width={40}
                   height={40}

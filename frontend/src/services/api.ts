@@ -66,4 +66,9 @@ export const authApi = {
     apiClient.get<User>("/auth/me"),
 };
 
+export const settingsApi = {
+  getAppearance: () =>
+    apiClient.get<Record<string, string>>("/settings"),
+};
+
 export default apiClient;

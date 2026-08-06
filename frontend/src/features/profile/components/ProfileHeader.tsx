@@ -1,6 +1,7 @@
 import { Camera, Pencil } from "lucide-react";
 import type { Profile } from "@/types";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 
@@ -20,12 +21,10 @@ export function ProfileHeader({ profile, isOwn, onEditCover, onEditAvatar }: Pro
     <div className="relative">
       <div className="relative h-48 w-full overflow-hidden rounded-3xl bg-gradient-to-br from-primary/20 via-purple-500/15 to-pink-500/10 sm:h-64 shadow-float">
         {profile.cover_photo_url && (
-          <img
+          <OptimizedImage
             src={profile.cover_photo_url}
             alt="Cover"
-            width={1200}
-            height={400}
-            decoding="async"
+            preset="feed"
             className="h-full w-full object-cover"
           />
         )}

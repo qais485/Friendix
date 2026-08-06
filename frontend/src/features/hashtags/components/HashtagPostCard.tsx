@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Heart, MessageCircle } from "lucide-react";
 import { formatDistanceToNow } from "@/lib/utils";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { HashtagPost } from "@/types";
 
 interface HashtagPostCardProps {
@@ -23,8 +24,12 @@ export function HashtagPostCard({ post, index = 0 }: HashtagPostCardProps) {
         <div className="flex items-center gap-3">
           {post.user_avatar ? (
             <img
-              src={post.user_avatar}
+              src={getCloudinaryTransformedUrl(post.user_avatar, "avatar")}
               alt=""
+              width={40}
+              height={40}
+              loading="lazy"
+              decoding="async"
               className="h-10 w-10 rounded-full object-cover"
             />
           ) : (
@@ -51,8 +56,12 @@ export function HashtagPostCard({ post, index = 0 }: HashtagPostCardProps) {
           return urls.length > 0 && (
             <div className="mt-3 overflow-hidden rounded-lg">
               <img
-                src={urls[0].trim()}
+                src={getCloudinaryTransformedUrl(urls[0].trim(), "modal")}
                 alt=""
+                width={400}
+                height={256}
+                loading="lazy"
+                decoding="async"
                 className="w-full max-h-64 object-cover"
               />
             </div>

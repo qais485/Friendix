@@ -22,32 +22,32 @@ export const feedApi = {
   getPost: (postId: string) =>
     api.get<Post>(`/feed/posts/${postId}`),
 
-  getHomeFeed: (cursor?: string) =>
+  getHomeFeed: (cursor?: string, limit?: number) =>
     api.get<FeedResponse>("/feed/home", {
-      params: { cursor },
+      params: { cursor, limit },
     }),
 
-  getFollowingFeed: (cursor?: string) =>
+  getFollowingFeed: (cursor?: string, limit?: number) =>
     api.get<FeedResponse>("/feed/following", {
-      params: { cursor },
+      params: { cursor, limit },
     }),
 
-  getFriendsFeed: (cursor?: string) =>
+  getFriendsFeed: (cursor?: string, limit?: number) =>
     api.get<FeedResponse>("/feed/friends", {
-      params: { cursor },
+      params: { cursor, limit },
     }),
 
-  getTrendingFeed: (cursor?: string) =>
+  getTrendingFeed: (cursor?: string, limit?: number) =>
     api.get<FeedResponse>("/feed/trending", {
-      params: { cursor },
+      params: { cursor, limit },
     }),
 
   getSuggestedPosts: () =>
     api.get<Post[]>("/feed/suggested"),
 
-  getUserPosts: (targetUserId: string, cursor?: string) =>
+  getUserPosts: (targetUserId: string, cursor?: string, limit?: number) =>
     api.get<FeedResponse>(`/feed/user/${targetUserId}`, {
-      params: { cursor },
+      params: { cursor, limit },
     }),
 
   savePost: (postId: string) =>

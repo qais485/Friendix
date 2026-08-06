@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Play } from "lucide-react";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 import type { SearchResultReel } from "@/types/search";
 
 interface ReelSearchResultsProps {
@@ -25,8 +27,10 @@ export function ReelSearchResults({ reels }: ReelSearchResultsProps) {
             {reel.video_url ? (
               <video
                 src={reel.video_url}
+                poster={getVideoPosterUrl(reel.video_url)}
                 className="h-full w-full object-cover"
                 muted
+                preload="metadata"
               />
             ) : (
               <div className="flex h-full items-center justify-center bg-muted">
@@ -37,9 +41,10 @@ export function ReelSearchResults({ reels }: ReelSearchResultsProps) {
             <div className="absolute bottom-0 left-0 right-0 p-2.5">
               <div className="flex items-center gap-1.5">
                 {reel.user_avatar ? (
-                  <img
+                  <OptimizedImage
                     src={reel.user_avatar}
                     alt=""
+                    preset="avatar"
                     className="h-5 w-5 rounded-full object-cover"
                   />
                 ) : (

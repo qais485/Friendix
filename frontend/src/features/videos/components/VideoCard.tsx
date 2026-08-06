@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Play, Clock, Eye, MoreVertical, Trash2, Edit } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import type { Video } from "@/types/videos";
 
 interface VideoCardProps {
@@ -55,13 +55,10 @@ export function VideoCard({ video, index = 0, showOwnerMenu = false, onDelete }:
       <Link to={`/watch/${video.id}`} className="block">
         <div className="relative overflow-hidden rounded-xl bg-muted">
           {video.thumbnail_url ? (
-            <img
-              src={getCloudinaryTransformedUrl(video.thumbnail_url, "thumbnail")}
+            <OptimizedImage
+              src={video.thumbnail_url}
               alt={video.title}
-              width={320}
-              height={180}
-              loading="lazy"
-              decoding="async"
+              preset="thumbnail"
               className="aspect-video w-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : (
@@ -85,13 +82,10 @@ export function VideoCard({ video, index = 0, showOwnerMenu = false, onDelete }:
         {video.user && (
           <Link to={`/profile/${video.user.username}`} className="shrink-0">
             {video.user.avatar_url ? (
-              <img
-                src={getCloudinaryTransformedUrl(video.user.avatar_url, "avatar")}
+              <OptimizedImage
+                src={video.user.avatar_url}
                 alt=""
-                width={36}
-                height={36}
-                loading="lazy"
-                decoding="async"
+                preset="avatar"
                 className="h-9 w-9 rounded-full object-cover"
               />
             ) : (

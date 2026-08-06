@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Loader2, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import {
   useUserHighlights,
   useCreateHighlight,
@@ -122,13 +123,10 @@ export function StoryHighlights({ userId, onSelectHighlight }: StoryHighlightsPr
             >
               <div className="aspect-[9/16] bg-gradient-to-br from-primary/20 to-primary/5">
                 {highlight.cover_url ? (
-                  <img
+                  <OptimizedImage
                     src={highlight.cover_url}
                     alt={highlight.title}
-                    width={160}
-                    height={284}
-                    loading="lazy"
-                    decoding="async"
+                    preset="story"
                     className="h-full w-full object-cover"
                   />
                 ) : (

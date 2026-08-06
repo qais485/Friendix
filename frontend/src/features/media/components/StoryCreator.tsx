@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Camera, Type, Music, Send, Loader2, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 
 import { UploadZone } from "./UploadZone";
 import { useCreateStory } from "../hooks";
@@ -138,17 +139,17 @@ export function StoryCreator({
                   {uploadedMedia.media_type === "video" ? (
                     <video
                       src={uploadedMedia.file_url}
+                      poster={getVideoPosterUrl(uploadedMedia.file_url)}
                       className="w-full rounded-xl"
                       controls
                       preload="metadata"
                     />
                   ) : (
-                    <img
-                      src={getCloudinaryTransformedUrl(uploadedMedia.file_url, "feed")}
+                    <OptimizedImage
+                      src={uploadedMedia.file_url}
                       alt="Upload preview"
-                      width={400}
-                      height={300}
-                      decoding="async"
+                      preset="feed"
+                      eager
                       className="w-full rounded-xl object-cover"
                       style={{ maxHeight: "300px" }}
                     />

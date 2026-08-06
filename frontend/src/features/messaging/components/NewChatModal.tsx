@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { useCreateConversation } from "../hooks";
 import { useFriends } from "@/features/friends/hooks";
 import { useAuthStore } from "@/store/authStore";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { cn } from "@/lib/utils";
 import type { FriendDetail } from "@/types";
 
@@ -106,13 +107,10 @@ export function NewChatModal({ onClose, onSelect }: NewChatModalProps) {
                   )}
                 >
                   {friend.avatar_url ? (
-                    <img
+                    <OptimizedImage
                       src={friend.avatar_url}
-                      alt={friend.full_name ?? undefined}
-                      width={40}
-                      height={40}
-                      loading="lazy"
-                      decoding="async"
+                      alt={friend.full_name || friend.username || "User"}
+                      preset="avatar"
                       className="h-10 w-10 rounded-full object-cover"
                     />
                   ) : (

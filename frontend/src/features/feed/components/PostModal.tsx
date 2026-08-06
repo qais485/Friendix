@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMutating } from "@tanstack/react-query";
@@ -32,6 +32,7 @@ import {
   UserCheck,
   Star,
   Share,
+  RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
@@ -41,6 +42,7 @@ import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import { ParsedContent } from "@/components/ParsedContent";
 import { CommentThread } from "@/features/comments";
 import { getPostBackgroundStyle } from "./composer";
+import { onModalOpened, onModalClosed } from "@/lib/activePost";
 import type { Post } from "@/types";
 
 interface PostModalProps {
@@ -70,6 +72,61 @@ interface PostModalProps {
   onFollow?: (userId: string) => void;
   onAddFriend?: (userId: string) => void;
   onAddCloseFriend?: (userId: string) => void;
+}
+
+function ModalVideo({ src }: { src: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [ended, setEnded] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+
+  const handlePlay = useCallback(() => setEnded(false), []);
+  const handleEnded = useCallback(() => setEnded(true), []);
+
+  const handleReplay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = 0;
+    setEnded(false);
+    video.play().catch(() => {});
+  }, []);
+
+  return (
+    <div className="relative flex h-full w-full items-center justify-center bg-black">
+      <video
+        ref={videoRef}
+        className="max-h-full max-w-full object-contain"
+        src={src}
+        playsInline
+        autoPlay
+        muted={isMuted}
+        preload="metadata"
+        onPlay={handlePlay}
+        onEnded={handleEnded}
+      >
+        Your browser does not support the video tag.
+      </video>
+
+      <button
+        onClick={() => setIsMuted((m) => !m)}
+        className="absolute right-3 top-3 z-10 rounded-full bg-white/10 p-2 text-white backdrop-blur-md transition-colors hover:bg-white/20 active:scale-95"
+        aria-label={isMuted ? "Unmute video" : "Mute video"}
+      >
+        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+      </button>
+
+      {ended && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/30">
+          <button
+            onClick={handleReplay}
+            className="flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md transition-all hover:bg-white/30 active:scale-95"
+            aria-label="Replay video"
+          >
+            <RotateCcw className="h-7 w-7" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function PostModal({
@@ -121,6 +178,13 @@ export function PostModal({
         window.scrollTo(0, scrollY);
       };
     }
+  }, [isOpen]);
+
+  // Pause all feed videos while the modal is open.
+  useEffect(() => {
+    if (!isOpen) return;
+    onModalOpened();
+    return () => onModalClosed();
   }, [isOpen]);
 
   // Close on ESC
@@ -286,16 +350,7 @@ export function PostModal({
 
                   {/* Video */}
                   {post.video_url && imageUrls.length === 0 && !post.gif_url && (
-                    <div className="relative flex h-full w-full items-center justify-center bg-black">
-                      <video
-                        controls
-                        preload="metadata"
-                        className="max-h-full max-w-full object-contain"
-                        src={post.video_url}
-                      >
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
+                    <ModalVideo src={post.video_url} />
                   )}
 
                   {/* GIF */}
@@ -359,14 +414,7 @@ export function PostModal({
                     />
                   )}
                   {post.video_url && imageUrls.length === 0 && !post.gif_url && (
-                    <div className="relative flex h-full w-full items-center justify-center bg-black">
-                      <video
-                        controls
-                        preload="metadata"
-                        className="max-h-full max-w-full object-contain"
-                        src={post.video_url}
-                      />
-                    </div>
+                    <ModalVideo src={post.video_url} />
                   )}
                   {post.gif_url && imageUrls.length === 0 && !post.video_url && (
                     <img

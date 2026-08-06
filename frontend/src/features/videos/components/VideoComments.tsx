@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Trash2, ChevronDown, ChevronUp, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { useVideoComments, useCreateVideoComment, useDeleteVideoComment, useVideoCommentReplies } from "../hooks";
 import { useAuthStore } from "@/store/authStore";
 import type { VideoComment } from "@/types/videos";
@@ -33,13 +34,10 @@ function CommentItem({ comment, videoId, currentUserId, onDelete }: {
     <div className="space-y-2">
       <div className="flex gap-3">
         {comment.user?.avatar_url ? (
-          <img
+          <OptimizedImage
             src={comment.user.avatar_url}
             alt=""
-            width={32}
-            height={32}
-            loading="lazy"
-            decoding="async"
+            preset="avatar"
             className="h-8 w-8 rounded-full object-cover shrink-0"
           />
         ) : (
@@ -83,13 +81,10 @@ function CommentItem({ comment, videoId, currentUserId, onDelete }: {
             {replies.map((reply) => (
               <div key={reply.id} className="flex gap-3">
                 {reply.user?.avatar_url ? (
-                  <img
+                  <OptimizedImage
                     src={reply.user.avatar_url}
                     alt=""
-                    width={24}
-                    height={24}
-                    loading="lazy"
-                    decoding="async"
+                    preset="avatar"
                     className="h-6 w-6 rounded-full object-cover shrink-0"
                   />
                 ) : (

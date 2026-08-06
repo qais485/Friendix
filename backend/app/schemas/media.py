@@ -152,6 +152,7 @@ class StoryResponse(BaseModel):
     is_archived: bool
     created_at: datetime
     updated_at: datetime
+    viewed: bool = False
     media: Optional[StoryMediaResponse] = None
     user: Optional[StoryUserResponse] = None
 

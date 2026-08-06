@@ -10,6 +10,7 @@ export function useMyProfile(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -21,6 +22,7 @@ export function usePublicProfile(username: string | undefined) {
       return data;
     },
     enabled: !!username,
+    staleTime: 120_000,
   });
 }
 

@@ -11,6 +11,7 @@ from app.core.config import get_settings
 settings = get_settings()
 
 security_scheme = HTTPBearer()
+optional_security_scheme = HTTPBearer(auto_error=False)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
@@ -74,3 +75,27 @@ def get_current_user_id(
             detail="Invalid user ID in token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+def get_optional_user_id(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(optional_security_scheme),
+) -> Optional[UUID]:
+    """Like get_current_user_id but returns None (guest) when no/invalid token.
+
+    Used by high-volume collection endpoints so anonymous visitors can be
+    tracked without requiring authentication.
+    """
+    if credentials is None:
+        return None
+    payload = decode_token(credentials.credentials)
+    if payload is None:
+        return None
+    if payload.get("type") != "access":
+        return None
+    user_id_str = payload.get("sub")
+    if user_id_str is None:
+        return None
+    try:
+        return UUID(user_id_str)
+    except ValueError:
+        return None

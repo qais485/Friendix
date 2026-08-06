@@ -24,6 +24,7 @@ export function useUserMedia(targetUserId: string | undefined, mediaType?: Media
       return data;
     },
     enabled: !!targetUserId,
+    staleTime: 60_000,
   });
 }
 
@@ -36,6 +37,7 @@ export function useUserMediaCount(targetUserId: string | undefined, mediaType?: 
       return data.count;
     },
     enabled: !!targetUserId,
+    staleTime: 60_000,
   });
 }
 
@@ -47,6 +49,7 @@ export function useUserMediaStats(targetUserId: string | undefined) {
       return data;
     },
     enabled: !!targetUserId,
+    staleTime: 60_000,
   });
 }
 
@@ -96,6 +99,7 @@ export function useUserAlbums(userId: string | undefined, targetUserId?: string)
       return data;
     },
     enabled: !!userId,
+    staleTime: 60_000,
   });
 }
 
@@ -107,6 +111,7 @@ export function useAlbum(albumId: string | undefined) {
       return data;
     },
     enabled: !!albumId,
+    staleTime: 60_000,
   });
 }
 
@@ -118,6 +123,7 @@ export function useAlbumPhotos(albumId: string | undefined) {
       return data;
     },
     enabled: !!albumId,
+    staleTime: 60_000,
   });
 }
 
@@ -194,6 +200,7 @@ export function useActiveStories(userIds: string) {
       return data;
     },
     enabled: !!userIds,
+    staleTime: 60_000,
   });
 }
 
@@ -205,6 +212,7 @@ export function useUserStories(targetUserId: string | undefined) {
       return data;
     },
     enabled: !!targetUserId,
+    staleTime: 60_000,
   });
 }
 
@@ -268,6 +276,7 @@ export function useArchivedStories(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 60_000,
   });
 }
 
@@ -293,6 +302,7 @@ export function useCloseFriendsStories(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 60_000,
   });
 }
 
@@ -329,6 +339,7 @@ export function useStoryReactions(storyId: string | undefined, userId: string | 
       return data;
     },
     enabled: !!storyId && !!userId,
+    staleTime: 30_000,
   });
 }
 
@@ -340,6 +351,7 @@ export function useStoryReactionCounts(storyId: string | undefined) {
       return data;
     },
     enabled: !!storyId,
+    staleTime: 30_000,
   });
 }
 
@@ -364,6 +376,7 @@ export function useStoryReplies(storyId: string | undefined, userId: string | un
       return data;
     },
     enabled: !!storyId && !!userId,
+    staleTime: 30_000,
   });
 }
 
@@ -387,6 +400,7 @@ export function useUserHighlights(userId: string | undefined) {
       return data;
     },
     enabled: !!userId,
+    staleTime: 120_000,
   });
 }
 
@@ -398,6 +412,7 @@ export function useHighlight(highlightId: string | undefined) {
       return data;
     },
     enabled: !!highlightId,
+    staleTime: 120_000,
   });
 }
 
@@ -472,6 +487,7 @@ export function useUserReels(targetUserId: string | undefined, limit = 20, offse
       return data;
     },
     enabled: !!targetUserId,
+    staleTime: 60_000,
   });
 }
 
@@ -483,6 +499,7 @@ export function useFeedReels(userId: string | undefined, limit = 20, offset = 0)
       return data;
     },
     enabled: !!userId,
+    staleTime: 60_000,
   });
 }
 
@@ -493,6 +510,7 @@ export function useTrendingReels(limit = 20, offset = 0) {
       const { data } = await mediaApi.getTrendingReels(limit, offset);
       return data;
     },
+    staleTime: 60_000,
   });
 }
 

@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 import { Button } from "@/components/ui/button";
 import type { Video } from "@/types/videos";
 
@@ -109,9 +110,11 @@ export function VideoPlayer({ video, onProgress, onEnded, autoPlay = false }: Vi
       <video
         ref={videoRef}
         src={video.video_url}
+        poster={getVideoPosterUrl(video.thumbnail_url ?? video.video_url)}
         className="w-full max-h-[70vh] object-contain mx-auto"
         autoPlay={autoPlay}
         playsInline
+        preload="metadata"
         onClick={togglePlay}
       />
 

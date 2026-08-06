@@ -2,6 +2,9 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import {
   getCloudinaryTransformedUrl,
+  getCloudinarySrcSet,
+  getCloudinarySizes,
+  getCloudinaryLqipUrl,
   type CloudinaryPreset,
 } from "@/lib/cloudinaryTransform";
 
@@ -48,6 +51,7 @@ const OptimizedImage = React.forwardRef<HTMLImageElement, OptimizedImageProps>(
     ref,
   ) => {
     const [hasError, setHasError] = React.useState(false);
+    const [isLoaded, setIsLoaded] = React.useState(false);
 
     const defaults = PRESET_DEFAULTS[preset];
     const imgWidth = (width as number) || defaults.width;
@@ -58,10 +62,25 @@ const OptimizedImage = React.forwardRef<HTMLImageElement, OptimizedImageProps>(
         ? src
         : getCloudinaryTransformedUrl(src, preset as CloudinaryPreset);
 
+    const srcSet =
+      preset === "full"
+        ? undefined
+        : getCloudinarySrcSet(src, preset as CloudinaryPreset) || undefined;
+
+    const sizes =
+      preset === "full" ? undefined : getCloudinarySizes(preset as CloudinaryPreset);
+
+    const lqipUrl =
+      preset === "full" ? null : getCloudinaryLqipUrl(src);
+
     const handleError = React.useCallback(() => {
       setHasError(true);
       onImageError?.();
     }, [onImageError]);
+
+    const handleLoad = React.useCallback(() => {
+      setIsLoaded(true);
+    }, []);
 
     if (hasError && fallback) {
       return <>{fallback}</>;
@@ -71,6 +90,8 @@ const OptimizedImage = React.forwardRef<HTMLImageElement, OptimizedImageProps>(
       <img
         ref={ref}
         src={resolvedSrc}
+        srcSet={srcSet}
+        sizes={sizes}
         alt={alt}
         width={imgWidth}
         height={imgHeight}
@@ -79,8 +100,20 @@ const OptimizedImage = React.forwardRef<HTMLImageElement, OptimizedImageProps>(
         className={cn(
           "object-cover",
           circle && "rounded-full",
+          isLoaded ? "blur-0" : "blur-xl",
+          "transition-[filter] duration-300 ease-out",
           className,
         )}
+        style={
+          !isLoaded && lqipUrl
+            ? {
+                backgroundImage: `url(${lqipUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+              }
+            : undefined
+        }
+        onLoad={handleLoad}
         onError={handleError}
         {...props}
       />

@@ -86,6 +86,10 @@ function LiveDiscoveryView() {
                     <img
                       src={getCloudinaryTransformedUrl(stream.thumbnail_url, "thumbnail")}
                       alt={stream.title}
+                      width={320}
+                      height={180}
+                      loading="lazy"
+                      decoding="async"
                       className="h-full w-full object-cover"
                     />
                   ) : (

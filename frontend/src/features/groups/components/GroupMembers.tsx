@@ -4,6 +4,7 @@ import { ShieldCheck, User, Loader2, MoreHorizontal, Crown, Users, UserPlus, Use
 import { Button } from "@/components/ui/button";
 import { useGroupMembers, useUpdateMemberRole, useRemoveMember } from "../hooks";
 import { useAuthStore } from "@/store/authStore";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import { useRelationshipSummary, useSendFriendRequest } from "@/features/friends/hooks";
 import { useToast } from "@/hooks/useToast";
 import type { GroupMember, Group } from "@/types";
@@ -125,7 +126,7 @@ function GroupMemberItem({
       <Link to={`/profile/${member.username}`}>
         {member.avatar_url ? (
           <img
-            src={member.avatar_url}
+            src={getCloudinaryTransformedUrl(member.avatar_url, "avatar")}
             alt=""
             width={40}
             height={40}

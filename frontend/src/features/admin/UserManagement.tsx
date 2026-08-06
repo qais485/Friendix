@@ -8,6 +8,7 @@ import {
 import { adminApi } from "@/services/adminApi";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn, formatDistanceToNow } from "@/lib/utils";
 import type { AdminUser } from "@/types";
@@ -123,8 +124,12 @@ export function UserManagement() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <img
-                          src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || user.username || "U")}`}
+                          src={getCloudinaryTransformedUrl(user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || user.username || "U")}`, "avatar")}
                           alt=""
+                          width={32}
+                          height={32}
+                          loading="lazy"
+                          decoding="async"
                           className="h-8 w-8 rounded-full object-cover"
                         />
                         <div>

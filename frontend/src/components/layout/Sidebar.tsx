@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { NotificationBell } from "@/features/notifications";
 import { useLayout } from "./AppLayout";
+import { LiquidGlassActiveIndicator } from "@/components/liquid-glass";
 
 const NAV_ITEMS = [
   { to: "/home", label: "Home", icon: Home },
@@ -141,7 +142,8 @@ function SidebarContent({
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto scrollbar-thin">
+      <nav className="relative flex-1 space-y-1 px-3 py-4 overflow-y-auto scrollbar-thin">
+        <LiquidGlassActiveIndicator />
         {NAV_ITEMS.map((item) => (
           <NavLink
             key={item.to}
@@ -149,9 +151,9 @@ function SidebarContent({
             onClick={onNavClick}
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                "relative z-10 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
                 isActive
-                  ? "bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary shadow-sm backdrop-blur-sm"
+                  ? "text-primary"
                   : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:backdrop-blur-sm"
               )
             }
@@ -175,9 +177,9 @@ function SidebarContent({
               onClick={onNavClick}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                  "relative z-10 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
                   isActive
-                    ? "bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary shadow-sm backdrop-blur-sm"
+                    ? "text-primary"
                     : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:backdrop-blur-sm"
                 )
               }
@@ -191,9 +193,9 @@ function SidebarContent({
                 onClick={onNavClick}
                 className={({ isActive }) =>
                   cn(
-                    "flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
+                    "relative z-10 flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-semibold transition-all duration-200",
                     isActive
-                      ? "bg-gradient-to-r from-primary/15 to-purple-500/10 text-primary shadow-sm backdrop-blur-sm"
+                      ? "text-primary"
                       : "text-muted-foreground hover:bg-muted/50 hover:text-foreground hover:backdrop-blur-sm"
                   )
                 }

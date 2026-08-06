@@ -4,6 +4,7 @@ import { Eye, FileText, Users, Heart, BookOpen, Clapperboard, Film, TrendingUp, 
 import { useAnalyticsOverview, useProfileViews, usePostAnalytics, useEngagement, useFollowersGrowth, useStoryAnalytics, useReelAnalytics, useVideoAnalytics } from './hooks';
 import { AnalyticsCardSkeleton } from '@/components/ui/Skeleton';
 import { ErrorState } from '@/components/ui/ErrorState';
+import { getCloudinaryTransformedUrl } from '@/lib/cloudinaryTransform';
 import type { AnalyticsOverview, ProfileViewSummary, PostAnalytics, EngagementData, FollowersGrowthSummary, StoryAnalyticsSummary, ReelAnalyticsSummary, VideoAnalyticsSummary } from '../../types/analytics';
 
 const tabs = [
@@ -105,7 +106,7 @@ function ProfileViewsTab({ data }: { data: ProfileViewSummary }) {
               <div key={v.user_id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-all duration-200">
                 <div className="flex items-center gap-3">
                   <img
-                    src={v.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${v.username}`}
+                    src={getCloudinaryTransformedUrl(v.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${v.username}`, "avatar")}
                     alt=""
                     width={36}
                     height={36}

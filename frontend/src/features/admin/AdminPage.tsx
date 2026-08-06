@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   Shield, Users, AlertTriangle, BarChart3,
   ToggleLeft, Ban, ClipboardList, Settings, UserCheck,
-  ChevronLeft, ChevronRight,
+  ChevronLeft, ChevronRight, Palette,
 } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ import { BannedUsersManagement } from "./BannedUsersManagement";
 import { AuditLogsView } from "./AuditLogsView";
 import { SystemSettingsView } from "./SystemSettingsView";
 import { VerificationRequestsView } from "./VerificationRequestsView";
+import { PostcardAppearanceView } from "./PostcardAppearanceView";
 
 type AdminTab =
   | "analytics"
@@ -25,6 +26,7 @@ type AdminTab =
   | "feature-flags"
   | "banned"
   | "audit-logs"
+  | "appearance"
   | "settings";
 
 const ADMIN_TABS = [
@@ -36,6 +38,7 @@ const ADMIN_TABS = [
   { key: "feature-flags" as const, label: "Feature Flags", icon: ToggleLeft },
   { key: "banned" as const, label: "Banned Users", icon: Ban },
   { key: "audit-logs" as const, label: "Audit Logs", icon: ClipboardList },
+  { key: "appearance" as const, label: "Appearance", icon: Palette },
   { key: "settings" as const, label: "Settings", icon: Settings },
 ];
 
@@ -152,6 +155,7 @@ export function AdminPage() {
               {activeTab === "feature-flags" && <FeatureFlagsManagement />}
               {activeTab === "banned" && <BannedUsersManagement />}
               {activeTab === "audit-logs" && <AuditLogsView />}
+              {activeTab === "appearance" && <PostcardAppearanceView />}
               {activeTab === "settings" && <SystemSettingsView />}
             </motion.div>
           </div>

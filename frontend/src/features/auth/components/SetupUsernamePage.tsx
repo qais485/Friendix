@@ -8,6 +8,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useUpdateUsername } from "@/features/profile/hooks";
 import { isValidUsername, smartUsername, USERNAME_MAX_LENGTH } from "@/lib/username";
 import { profileApi } from "@/services/profileApi";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 
 type UsernameStatus = "idle" | "checking" | "available" | "taken" | "invalid";
 
@@ -128,8 +129,12 @@ export function SetupUsernamePage() {
           {user?.avatar_url && (
             <div className="flex justify-center mb-6">
               <img
-                src={user.avatar_url}
+                src={getCloudinaryTransformedUrl(user.avatar_url, "avatar")}
                 alt={user.full_name || "User"}
+                width={64}
+                height={64}
+                loading="lazy"
+                decoding="async"
                 className="h-16 w-16 rounded-full object-cover ring-4 ring-primary/10"
               />
             </div>

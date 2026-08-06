@@ -219,11 +219,21 @@ class MediaService:
 
     def get_active_stories(self, user_ids: list[UUID], viewer_id: UUID | None = None) -> list[StoryResponse]:
         stories = self.media_repo.get_active_stories(user_ids, viewer_id)
-        return [self._story_to_response(s) for s in stories]
+        responses = [self._story_to_response(s) for s in stories]
+        if viewer_id:
+            viewed_ids = self.media_repo.get_viewed_story_ids([s.id for s in stories], viewer_id)
+            for r in responses:
+                r.viewed = r.id in viewed_ids
+        return responses
 
     def get_user_stories(self, user_id: UUID, viewer_id: UUID | None = None) -> list[StoryResponse]:
         stories = self.media_repo.get_user_stories(user_id, viewer_id)
-        return [self._story_to_response(s) for s in stories]
+        responses = [self._story_to_response(s) for s in stories]
+        if viewer_id:
+            viewed_ids = self.media_repo.get_viewed_story_ids([s.id for s in stories], viewer_id)
+            for r in responses:
+                r.viewed = r.id in viewed_ids
+        return responses
 
     def view_story(self, story_id: UUID, viewer_id: UUID) -> StoryViewResponse:
         story = self.media_repo.get_story_by_id(story_id)

@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, CheckCheck, Smile, Reply, Pencil, Trash2, Forward, Download, X } from "lucide-react";
 import { useAuthStore } from "@/store/authStore";
 import { useMessagingStore } from "@/store/messagingStore";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 import type { Message, MessageReaction } from "@/types";
 
 const QUICK_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
@@ -203,13 +204,10 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
 
             {message.message_type === "image" && message.media_url && (
               <div className="relative group/img mb-1">
-                <img
-                  src={getCloudinaryTransformedUrl(message.media_url, "feed")}
+                <OptimizedImage
+                  src={message.media_url}
                   alt="Shared image"
-                  width={400}
-                  height={300}
-                  loading="lazy"
-                  decoding="async"
+                  preset="feed"
                   className="max-h-60 rounded-lg object-cover cursor-pointer"
                   onClick={() => setLightboxOpen(true)}
                 />
@@ -228,6 +226,7 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
             {message.message_type === "video" && message.media_url && (
               <video
                 src={message.media_url}
+                poster={getVideoPosterUrl(message.media_url)}
                 controls
                 preload="metadata"
                 width={320}
@@ -265,25 +264,19 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
             )}
 
             {message.message_type === "gif" && message.media_url && (
-              <img
+              <OptimizedImage
                 src={message.media_url}
                 alt="GIF"
-                width={320}
-                height={192}
-                loading="lazy"
-                decoding="async"
+                preset="full"
                 className="mb-1 max-h-48 rounded-lg"
               />
             )}
 
             {message.message_type === "sticker" && message.media_url && (
-              <img
+              <OptimizedImage
                 src={message.media_url}
                 alt="Sticker"
-                width={96}
-                height={96}
-                loading="lazy"
-                decoding="async"
+                preset="full"
                 className="h-24 w-24 object-contain"
               />
             )}
@@ -388,12 +381,11 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
             >
               <Download className="h-6 w-6" />
             </button>
-            <img
-              src={getCloudinaryTransformedUrl(message.media_url, "modal")}
+            <OptimizedImage
+              src={message.media_url}
               alt="Full size"
-              width={1200}
-              height={900}
-              decoding="async"
+              preset="modal"
+              eager
               className="max-h-[90vh] max-w-[90vw] object-contain"
               onClick={(e) => e.stopPropagation()}
             />

@@ -1,9 +1,11 @@
 from uuid import UUID
+import hashlib
 import os
 import uuid
+from datetime import timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, UploadFile, File
+from fastapi.responses import Response, StreamingResponse
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
@@ -529,6 +531,7 @@ def remove_story_from_highlight(
 @router.get("/proxy/{media_id}")
 def proxy_media(
     media_id: UUID,
+    request: Request,
     db: Session = Depends(get_db),
     user_id: UUID = Depends(get_current_user_id),
 ):
@@ -575,6 +578,14 @@ def proxy_media(
             if not are_friends:
                 raise HTTPException(status_code=403, detail="Access denied")
 
+    updated_ts = media.updated_at.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    etag_input = f"{media.id}:{updated_ts}"
+    etag = f'"{hashlib.md5(etag_input.encode()).hexdigest()}"'
+
+    if_none_match = request.headers.get("if-none-match")
+    if if_none_match and if_none_match.strip() == etag:
+        return Response(status_code=304)
+
     try:
         response = httpx.get(media.file_url, follow_redirects=True, timeout=30)
         response.raise_for_status()
@@ -582,10 +593,18 @@ def proxy_media(
         raise HTTPException(status_code=502, detail="Failed to fetch media")
 
     content_type = media.mime_type or "application/octet-stream"
+    content_length = media.file_size or len(response.content)
+
+    cache_headers = {
+        "Cache-Control": "private, max-age=3600, stale-while-revalidate=86400",
+        "ETag": etag,
+        "Content-Disposition": f'inline; filename="{media.original_name or "file"}"',
+        "Content-Length": str(content_length),
+        "X-Content-Type-Options": "nosniff",
+    }
+
     return StreamingResponse(
         iter([response.content]),
         media_type=content_type,
-        headers={
-            "Content-Disposition": f'inline; filename="{media.original_name or "file"}"'
-        },
+        headers=cache_headers,
     )

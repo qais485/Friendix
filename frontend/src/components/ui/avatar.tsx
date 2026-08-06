@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 const avatarVariants = cva(
   "relative flex shrink-0 overflow-hidden rounded-full ring-2 ring-white/30 shadow-lg",
@@ -64,15 +64,15 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         {...props}
       >
         {shouldShowImage ? (
-          <img
-            src={getCloudinaryTransformedUrl(src!, "avatar")}
+          <OptimizedImage
+            src={src!}
             alt={alt || "Avatar"}
+            preset="avatar"
             width={px}
             height={px}
-            loading={eager ? "eager" : "lazy"}
-            decoding="async"
+            eager={eager}
             className="aspect-square h-full w-full object-cover"
-            onError={() => setHasError(true)}
+            onImageError={() => setHasError(true)}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-purple-500/20 text-primary font-bold">

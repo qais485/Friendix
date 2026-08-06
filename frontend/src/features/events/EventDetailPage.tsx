@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import { useEventDetail, useRSVPEvent, useDeleteEvent, useCancelEvent } from "./hooks";
 import { EventAttendees } from "./components/EventAttendees";
 import { EventChat } from "./components/EventChat";
@@ -92,10 +93,11 @@ export function EventDetailPage() {
             {event.cover_url && (
               <div className="relative">
                 <img
-                  src={event.cover_url}
+                  src={getCloudinaryTransformedUrl(event.cover_url, "modal")}
                   alt=""
                   width={800}
                   height={208}
+                  loading="lazy"
                   decoding="async"
                   className="h-52 w-full object-cover"
                 />

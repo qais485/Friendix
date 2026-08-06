@@ -1,7 +1,64 @@
 from uuid import UUID
+from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, desc, func, text
 from app.models import Post, PostLike, PostSave, PostHide, FeedPosition, Friendship, CloseFriend, Follow, User, Poll, PollOption, PollVote, BlockedUser, Mute
+
+
+_CURSOR_SEP = "|"
+
+
+def encode_cursor(is_pinned: bool, created_at: datetime, post_id: UUID) -> str:
+    """Opaque keyset cursor for feeds ordered by (is_pinned, created_at, id) DESC."""
+    return f"{1 if is_pinned else 0}|{created_at.isoformat()}|{post_id}"
+
+
+def encode_trending_cursor(score: float, created_at: datetime, post_id: UUID) -> str:
+    """Opaque keyset cursor for feeds ordered by (trending_score, created_at, id) DESC."""
+    return f"{round(score, 8)}|{created_at.isoformat()}|{post_id}"
+
+
+def parse_cursor(cursor: str | None):
+    """Decode a feed keyset cursor into (is_pinned, created_at, post_id).
+
+    Falls back to legacy bare-UUID cursors, returning (None, None, post_id).
+    """
+    if not cursor:
+        return None
+    parts = cursor.split(_CURSOR_SEP)
+    if len(parts) == 3:
+        try:
+            return (
+                parts[0] == "1",
+                datetime.fromisoformat(parts[1]),
+                UUID(parts[2]),
+            )
+        except (ValueError, TypeError):
+            return None
+    try:
+        return (None, None, UUID(cursor))
+    except (ValueError, TypeError):
+        return None
+
+
+def parse_trending_cursor(cursor: str | None):
+    """Decode a trending keyset cursor into (trending_score, created_at, post_id)."""
+    if not cursor:
+        return None
+    parts = cursor.split(_CURSOR_SEP)
+    if len(parts) == 3:
+        try:
+            return (
+                float(parts[0]),
+                datetime.fromisoformat(parts[1]),
+                UUID(parts[2]),
+            )
+        except (ValueError, TypeError):
+            return None
+    try:
+        return (None, None, UUID(cursor))
+    except (ValueError, TypeError):
+        return None
 
 
 class FeedRepository:
@@ -95,7 +152,7 @@ class FeedRepository:
             if (repost.repost_count or 0) > 0:
                 repost.repost_count -= 1
 
-    def get_home_feed(self, user_id: UUID, cursor: UUID | None = None, limit: int = 20) -> list[Post]:
+    def get_home_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> list[Post]:
         hidden_ids = self._get_hidden_post_ids(user_id)
         friend_ids = self._get_friend_ids(user_id)
         close_friend_ids = self._get_close_friend_ids(user_id)
@@ -136,14 +193,25 @@ class FeedRepository:
         )
         
         query = self.db.query(Post).filter(or_(everyone_filter, friends_filter, close_friends_filter, followers_filter, friends_followers_filter))
-        
-        if cursor:
-            cursor_post = self.db.query(Post).filter(Post.id == cursor).first()
-            if cursor_post:
-                query = query.filter(Post.created_at < cursor_post.created_at)
-        return query.order_by(desc(Post.is_pinned), desc(Post.created_at)).limit(limit + 1).all()
 
-    def get_following_feed(self, user_id: UUID, cursor: UUID | None = None, limit: int = 20) -> list[Post]:
+        parsed = parse_cursor(cursor)
+        if parsed:
+            is_pinned, created_at, cursor_id = parsed
+            if is_pinned is not None:
+                query = query.filter(
+                    or_(
+                        and_(Post.is_pinned.is_(False), is_pinned is True),
+                        and_(Post.is_pinned == is_pinned, Post.created_at < created_at),
+                        and_(Post.is_pinned == is_pinned, Post.created_at == created_at, Post.id < cursor_id),
+                    )
+                )
+            else:
+                cursor_post = self.db.query(Post).filter(Post.id == cursor_id).first()
+                if cursor_post:
+                    query = query.filter(Post.created_at < cursor_post.created_at)
+        return query.order_by(desc(Post.is_pinned), desc(Post.created_at), desc(Post.id)).limit(limit + 1).all()
+
+    def get_following_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> list[Post]:
         following_ids = self._get_following_ids(user_id)
         friend_ids = self._get_friend_ids(user_id)
         blocked_ids = self._get_blocked_user_ids(user_id)
@@ -174,13 +242,24 @@ class FeedRepository:
 
         query = self.db.query(Post).filter(or_(everyone_filter, friends_filter))
 
-        if cursor:
-            cursor_post = self.db.query(Post).filter(Post.id == cursor).first()
-            if cursor_post:
-                query = query.filter(Post.created_at < cursor_post.created_at)
-        return query.order_by(desc(Post.is_pinned), desc(Post.created_at)).limit(limit + 1).all()
+        parsed = parse_cursor(cursor)
+        if parsed:
+            is_pinned, created_at, cursor_id = parsed
+            if is_pinned is not None:
+                query = query.filter(
+                    or_(
+                        and_(Post.is_pinned.is_(False), is_pinned is True),
+                        and_(Post.is_pinned == is_pinned, Post.created_at < created_at),
+                        and_(Post.is_pinned == is_pinned, Post.created_at == created_at, Post.id < cursor_id),
+                    )
+                )
+            else:
+                cursor_post = self.db.query(Post).filter(Post.id == cursor_id).first()
+                if cursor_post:
+                    query = query.filter(Post.created_at < cursor_post.created_at)
+        return query.order_by(desc(Post.is_pinned), desc(Post.created_at), desc(Post.id)).limit(limit + 1).all()
 
-    def get_friends_feed(self, user_id: UUID, cursor: UUID | None = None, limit: int = 20) -> list[Post]:
+    def get_friends_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> list[Post]:
         friend_ids = self._get_friend_ids(user_id)
         close_friend_ids = self._get_close_friend_ids(user_id)
         hidden_ids = self._get_hidden_post_ids(user_id)
@@ -209,13 +288,24 @@ class FeedRepository:
                 )
             )
         )
-        if cursor:
-            cursor_post = self.db.query(Post).filter(Post.id == cursor).first()
-            if cursor_post:
-                query = query.filter(Post.created_at < cursor_post.created_at)
-        return query.order_by(desc(Post.is_pinned), desc(Post.created_at)).limit(limit + 1).all()
+        parsed = parse_cursor(cursor)
+        if parsed:
+            is_pinned, created_at, cursor_id = parsed
+            if is_pinned is not None:
+                query = query.filter(
+                    or_(
+                        and_(Post.is_pinned.is_(False), is_pinned is True),
+                        and_(Post.is_pinned == is_pinned, Post.created_at < created_at),
+                        and_(Post.is_pinned == is_pinned, Post.created_at == created_at, Post.id < cursor_id),
+                    )
+                )
+            else:
+                cursor_post = self.db.query(Post).filter(Post.id == cursor_id).first()
+                if cursor_post:
+                    query = query.filter(Post.created_at < cursor_post.created_at)
+        return query.order_by(desc(Post.is_pinned), desc(Post.created_at), desc(Post.id)).limit(limit + 1).all()
 
-    def get_trending_feed(self, user_id: UUID, cursor: UUID | None = None, limit: int = 20) -> list[Post]:
+    def get_trending_feed(self, user_id: UUID, cursor: str | None = None, limit: int = 10) -> list[Post]:
         hidden_ids = self._get_hidden_post_ids(user_id)
         blocked_ids = self._get_blocked_user_ids(user_id)
         query = (
@@ -231,19 +321,30 @@ class FeedRepository:
                 )
             )
         )
-        if cursor:
-            cursor_post = self.db.query(Post).filter(Post.id == cursor).first()
-            if cursor_post:
+        parsed = parse_trending_cursor(cursor)
+        if parsed:
+            score, created_at, cursor_id = parsed
+            if score is not None:
                 query = query.filter(
                     or_(
-                        Post.trending_score < cursor_post.trending_score,
-                        and_(
-                            Post.trending_score == cursor_post.trending_score,
-                            Post.created_at < cursor_post.created_at,
-                        ),
+                        Post.trending_score < score,
+                        and_(Post.trending_score == score, Post.created_at < created_at),
+                        and_(Post.trending_score == score, Post.created_at == created_at, Post.id < cursor_id),
                     )
                 )
-        return query.order_by(desc(Post.trending_score), desc(Post.created_at)).limit(limit + 1).all()
+            else:
+                cursor_post = self.db.query(Post).filter(Post.id == cursor_id).first()
+                if cursor_post:
+                    query = query.filter(
+                        or_(
+                            Post.trending_score < cursor_post.trending_score,
+                            and_(
+                                Post.trending_score == cursor_post.trending_score,
+                                Post.created_at < cursor_post.created_at,
+                            ),
+                        )
+                    )
+        return query.order_by(desc(Post.trending_score), desc(Post.created_at), desc(Post.id)).limit(limit + 1).all()
 
     def get_suggested_posts(self, user_id: UUID, limit: int = 10) -> list[Post]:
         friend_ids = self._get_friend_ids(user_id)
@@ -268,7 +369,7 @@ class FeedRepository:
         )
         return query.order_by(desc(Post.trending_score), desc(Post.created_at)).limit(limit).all()
 
-    def get_user_posts(self, user_id: UUID, viewer_id: UUID, cursor: UUID | None = None, limit: int = 20) -> list[Post]:
+    def get_user_posts(self, user_id: UUID, viewer_id: UUID, cursor: str | None = None, limit: int = 10) -> list[Post]:
         hidden_ids = self._get_hidden_post_ids(viewer_id)
         are_friends = self._are_friends(user_id, viewer_id)
         is_close = self._is_close_friend(user_id, viewer_id) if are_friends else False
@@ -295,12 +396,23 @@ class FeedRepository:
             )
         )
 
-        if cursor:
-            cursor_post = self.db.query(Post).filter(Post.id == cursor).first()
-            if cursor_post:
-                query = query.filter(Post.created_at < cursor_post.created_at)
+        parsed = parse_cursor(cursor)
+        if parsed:
+            is_pinned, created_at, cursor_id = parsed
+            if is_pinned is not None:
+                query = query.filter(
+                    or_(
+                        and_(Post.is_pinned.is_(False), is_pinned is True),
+                        and_(Post.is_pinned == is_pinned, Post.created_at < created_at),
+                        and_(Post.is_pinned == is_pinned, Post.created_at == created_at, Post.id < cursor_id),
+                    )
+                )
+            else:
+                cursor_post = self.db.query(Post).filter(Post.id == cursor_id).first()
+                if cursor_post:
+                    query = query.filter(Post.created_at < cursor_post.created_at)
 
-        return query.order_by(desc(Post.is_pinned), desc(Post.created_at)).limit(limit + 1).all()
+        return query.order_by(desc(Post.is_pinned), desc(Post.created_at), desc(Post.id)).limit(limit + 1).all()
 
     def is_post_liked(self, user_id: UUID, post_id: UUID) -> bool:
         return self.db.query(PostLike).filter(
@@ -339,6 +451,24 @@ class FeedRepository:
         return self.db.query(PostSave).filter(
             and_(PostSave.user_id == user_id, PostSave.post_id == post_id)
         ).first() is not None
+
+    def get_liked_post_ids(self, user_id: UUID, post_ids: list) -> set[UUID]:
+        if not post_ids:
+            return set()
+        rows = self.db.query(PostLike.post_id).filter(
+            PostLike.user_id == user_id,
+            PostLike.post_id.in_(post_ids),
+        ).all()
+        return {row[0] for row in rows}
+
+    def get_saved_post_ids(self, user_id: UUID, post_ids: list) -> set[UUID]:
+        if not post_ids:
+            return set()
+        rows = self.db.query(PostSave.post_id).filter(
+            PostSave.user_id == user_id,
+            PostSave.post_id.in_(post_ids),
+        ).all()
+        return {row[0] for row in rows}
 
     def save_post(self, user_id: UUID, post_id: UUID) -> PostSave | None:
         existing = self.db.query(PostSave).filter(

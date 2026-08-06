@@ -22,6 +22,7 @@ import { useTogglePin, useToggleArchive, useToggleMute, useDeleteConversation } 
 import { useRelationshipSummary, useSendFriendRequest, useFollow, useBlockUser } from "@/features/friends/hooks";
 import { useToast } from "@/hooks/useToast";
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { CallModal } from "./CallModal";
 import { ChatThemeSelector } from "./ChatThemeSelector";
 import type { Conversation } from "@/types";
@@ -106,13 +107,11 @@ export function ChatHeader({ conversation, onBack }: ChatHeaderProps) {
 
       <div className="relative flex-shrink-0">
         {avatarUrl ? (
-          <img
+          <OptimizedImage
             src={avatarUrl}
             alt={displayName}
-            width={40}
-            height={40}
-            loading="eager"
-            decoding="async"
+            preset="avatar"
+            eager
             className="h-10 w-10 rounded-full object-cover"
           />
         ) : (

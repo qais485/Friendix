@@ -13,6 +13,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 
 interface VideoEditorProps {
   videoUrl: string;
@@ -151,6 +152,7 @@ export function VideoEditor({ videoUrl, onSave, onCancel }: VideoEditorProps) {
           <video
             ref={videoRef}
             src={videoUrl}
+            poster={getVideoPosterUrl(videoUrl)}
             className="max-h-[70vh] max-w-full rounded-lg"
             muted={isMuted}
             playsInline

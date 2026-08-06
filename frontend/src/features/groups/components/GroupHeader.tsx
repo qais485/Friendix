@@ -1,6 +1,7 @@
 import { Globe, Lock, EyeOff, Users, Settings, UserPlus, UserMinus, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useJoinGroup, useLeaveGroup } from "../hooks";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { Group } from "@/types";
 
 const PRIVACY_ICONS = { public: Globe, private: Lock, hidden: EyeOff };
@@ -27,10 +28,11 @@ export function GroupHeader({ group }: GroupHeaderProps) {
       {group.cover_url && (
         <div className="h-32 sm:h-48 w-full bg-muted">
           <img
-            src={group.cover_url}
+            src={getCloudinaryTransformedUrl(group.cover_url, "modal")}
             alt=""
             width={800}
             height={192}
+            loading="lazy"
             decoding="async"
             className="h-full w-full object-cover"
           />

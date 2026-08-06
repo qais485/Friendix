@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { X, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import type { Profile } from "@/types";
 
 interface ProfilePreviewProps {
@@ -43,12 +44,10 @@ export function ProfilePreview({ profile, isOpen, onClose }: ProfilePreviewProps
       >
         <div className={cn("relative h-32 bg-gradient-to-br", themeColors[profile.profile_theme] || themeColors.default)}>
           {profile.cover_photo_url && (
-            <img
+            <OptimizedImage
               src={profile.cover_photo_url}
               alt="Cover"
-              width={448}
-              height={128}
-              decoding="async"
+              preset="feed"
               className="h-full w-full object-cover"
             />
           )}
@@ -61,12 +60,11 @@ export function ProfilePreview({ profile, isOpen, onClose }: ProfilePreviewProps
           <div className="-mt-12 flex justify-center">
             <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-background bg-gradient-to-br from-primary/20 to-muted">
               {profile.avatar_url ? (
-                <img
+                <OptimizedImage
                   src={profile.avatar_url}
                   alt={profile.full_name || "Avatar"}
-                  width={96}
-                  height={96}
-                  decoding="async"
+                  preset="avatar"
+                  eager
                   className="h-full w-full object-cover"
                 />
               ) : (

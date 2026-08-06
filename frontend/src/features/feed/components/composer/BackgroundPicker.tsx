@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Palette, X, Check, ImageIcon, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 
 export interface PostBackground {
   value: string;
@@ -240,13 +242,10 @@ export function BackgroundPicker({
       </button>
       {backgroundImageUrl && (
         <div className="relative overflow-hidden rounded-lg">
-          <img
+          <OptimizedImage
             src={backgroundImageUrl}
             alt="Background"
-            width={320}
-            height={80}
-            loading="lazy"
-            decoding="async"
+            preset="full"
             className="h-20 w-full object-cover"
           />
           <button
@@ -409,7 +408,7 @@ export function getPostBackgroundStyle(
   if (value === "custom-image" && backgroundImageUrl) {
     return {
       style: {
-        backgroundImage: `url(${backgroundImageUrl})`,
+        backgroundImage: `url(${getCloudinaryTransformedUrl(backgroundImageUrl, "modal")})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       },

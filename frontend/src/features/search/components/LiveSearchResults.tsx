@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import type { SearchResultLive } from "@/types/search";
 
 interface LiveSearchResultsProps {
@@ -22,9 +23,10 @@ export function LiveSearchResults({ lives }: LiveSearchResultsProps) {
             className="flex items-center gap-3 rounded-2xl glass-card p-4 transition-colors hover:bg-muted/50"
           >
             {live.user_avatar ? (
-              <img
+              <OptimizedImage
                 src={live.user_avatar}
                 alt=""
+                preset="avatar"
                 className="h-12 w-12 rounded-full object-cover"
               />
             ) : (

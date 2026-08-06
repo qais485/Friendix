@@ -4,6 +4,7 @@ import { Search, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useSearchUsers } from "@/features/profile/hooks";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 
 interface UserSearchProps {
   onSelect: (userId: string) => void;
@@ -67,8 +68,12 @@ export function UserSearch({
             >
               {user.avatar_url ? (
                 <img
-                  src={user.avatar_url}
+                  src={getCloudinaryTransformedUrl(user.avatar_url, "avatar")}
                   alt={user.full_name || "User"}
+                  width={32}
+                  height={32}
+                  loading="lazy"
+                  decoding="async"
                   className="h-8 w-8 rounded-full object-cover"
                 />
               ) : (

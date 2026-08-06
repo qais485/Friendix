@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Loader2, UploadCloud, X, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
+import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 interface MediaPanelProps {
   kind: "image" | "video";
@@ -82,7 +83,7 @@ export function MediaPanel({
         <div className="grid grid-cols-3 gap-2">
           {imageUrls.map((url, index) => (
             <div key={url} className="relative aspect-square overflow-hidden rounded-xl">
-              <img src={getCloudinaryTransformedUrl(url, "thumbnail")} alt={`Upload ${index + 1}`} className="h-full w-full object-cover" />
+              <OptimizedImage src={url} alt={`Upload ${index + 1}`} preset="thumbnail" className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => onRemoveImage(index)}
@@ -113,6 +114,7 @@ export function MediaPanel({
         <div className="relative overflow-hidden rounded-xl">
           <video
             src={videoUrl}
+            poster={getVideoPosterUrl(videoUrl)}
             className="max-h-[320px] w-full rounded-xl"
             controls
             preload="metadata"

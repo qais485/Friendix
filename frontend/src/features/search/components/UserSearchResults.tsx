@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { useRelationshipSummary, useSendFriendRequest, useFollow } from "@/features/friends/hooks";
 import { useToast } from "@/hooks/useToast";
 import type { SearchResultUser } from "@/types/search";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 
 interface UserSearchResultsProps {
   users: SearchResultUser[];
@@ -42,7 +43,7 @@ function UserSearchResultCard({ user: searchUser, currentUserId, toast }: { user
         <Link to={`/profile/${searchUser.username}`} className="flex items-center gap-3 flex-1 min-w-0">
           {searchUser.avatar_url ? (
             <img
-              src={searchUser.avatar_url}
+              src={getCloudinaryTransformedUrl(searchUser.avatar_url, "avatar")}
               alt=""
               width={48}
               height={48}

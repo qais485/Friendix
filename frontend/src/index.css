@@ -158,17 +158,31 @@
   }
 
   .liquid-glass {
-    --glass-frost: 0.1;
-    --glass-saturation: 1.2;
-    background: hsl(0 0% 0% / var(--glass-frost));
-    -webkit-backdrop-filter: url(#glass-filter) saturate(var(--glass-saturation));
-    backdrop-filter: url(#glass-filter) saturate(var(--glass-saturation));
+    background: hsl(0 0% 0% / 0.1);
+    -webkit-backdrop-filter: url(#glass-filter) saturate(1.2);
+    backdrop-filter: url(#glass-filter) saturate(1.2);
     box-shadow:
       inset 0 0 2px 1px lab(100% 0 0 / .35),
       inset 0 0 10px 4px lab(100% 0 0 / .15),
       inset 0 4px 16px lab(5.32203% 1.61424 -5.88284 / .0509804),
       inset 0 8px 24px lab(5.32203% 1.61424 -5.88284 / .0509804),
       inset 0 6px 56px lab(5.32203% 1.61424 -5.88284 / .0509804);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .liquid-glass-dark {
+    background: hsl(0 0% 0% / 0.25);
+    -webkit-backdrop-filter: url(#glass-filter) saturate(1.2);
+    backdrop-filter: url(#glass-filter) saturate(1.2);
+    box-shadow:
+      inset 0 0 2px 1px lab(100% 0 0 / .2),
+      inset 0 0 10px 4px lab(100% 0 0 / .08),
+      inset 0 4px 16px lab(5.32203% 1.61424 -5.88284 / .1),
+      inset 0 8px 24px lab(5.32203% 1.61424 -5.88284 / .1),
+      inset 0 6px 56px lab(5.32203% 1.61424 -5.88284 / .1);
+    position: relative;
+    overflow: hidden;
   }
 
   /* Gradient utilities */

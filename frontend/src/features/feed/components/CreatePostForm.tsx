@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Loader2, Smile, MapPin, Clock, X, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/useToast";
 import { useUploadToMedia } from "../hooks";
@@ -218,13 +219,11 @@ export function CreatePostForm({
               <div className="absolute left-0 right-0 top-0 flex items-center justify-between px-4 pt-3">
                 <div className="flex items-center gap-3">
                   {userAvatar ? (
-                    <img
+                    <OptimizedImage
                       src={userAvatar}
                       alt={userName || "User"}
-                      width={36}
-                      height={36}
-                      loading="eager"
-                      decoding="async"
+                      preset="avatar"
+                      eager
                       className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30"
                     />
                   ) : (
@@ -412,13 +411,11 @@ export function CreatePostForm({
             {/* Normal Mode */}
             <div className="flex gap-3 p-4">
               {userAvatar ? (
-                <img
+                <OptimizedImage
                   src={userAvatar}
                   alt={userName || "User"}
-                  width={40}
-                  height={40}
-                  loading="eager"
-                  decoding="async"
+                  preset="avatar"
+                  eager
                   className="h-10 w-10 rounded-full object-cover"
                 />
               ) : (

@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Calendar, MapPin, Users, Loader2, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRSVPEvent } from "../hooks";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 import type { Event } from "@/types";
 
 interface EventCardProps {
@@ -24,7 +25,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
         {event.cover_url && (
           <Link to={`/events/${event.id}`}>
             <img
-              src={event.cover_url}
+              src={getCloudinaryTransformedUrl(event.cover_url, "modal")}
               alt=""
               width={400}
               height={144}

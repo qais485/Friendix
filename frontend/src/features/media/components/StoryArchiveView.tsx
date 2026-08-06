@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Archive, Camera, Loader2, RotateCcw, Trash2 } from "lucide-react";
-import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 
 
 import { useArchivedStories, useUnarchiveStory, useDeleteStory } from "../hooks";
@@ -68,13 +68,10 @@ export function StoryArchiveView({ userId, onViewStory }: StoryArchiveViewProps)
                 className="aspect-[9/16] w-full"
               >
                 {story.media ? (
-                  <img
-                    src={getCloudinaryTransformedUrl(story.media.thumbnail_url || story.media.file_url, "story")}
+                  <OptimizedImage
+                    src={story.media.thumbnail_url || story.media.file_url}
                     alt="Archived story"
-                    width={160}
-                    height={284}
-                    loading="lazy"
-                    decoding="async"
+                    preset="story"
                     className="h-full w-full object-cover"
                   />
                 ) : (

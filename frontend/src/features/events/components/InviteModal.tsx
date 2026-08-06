@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useInviteToEvent } from "../hooks";
 import { useFriends } from "@/features/friends/hooks";
 import { useAuthStore } from "@/store/authStore";
+import { getCloudinaryTransformedUrl } from "@/lib/cloudinaryTransform";
 
 interface InviteModalProps {
   isOpen: boolean;
@@ -80,7 +81,7 @@ export function InviteModal({ isOpen, onClose, eventId }: InviteModalProps) {
                   >
                     {friend.avatar_url ? (
                       <img
-                        src={friend.avatar_url}
+                        src={getCloudinaryTransformedUrl(friend.avatar_url, "avatar")}
                         alt=""
                         width={40}
                         height={40}

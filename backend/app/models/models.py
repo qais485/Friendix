@@ -1352,3 +1352,239 @@ class ProfileView(Base, TimestampMixin):
 
     viewer = relationship("User", foreign_keys=[viewer_id], backref="profile_views_made")
     viewed = relationship("User", foreign_keys=[viewed_id], backref="profile_views_received")
+
+
+# ============================================================
+# Content Event Tracking Models
+# ============================================================
+
+class ContentEvent(Base, TimestampMixin):
+    """Append-only raw event log for content engagement tracking.
+
+    Every user action (impression, view start, watch time heartbeat, like,
+    share, report, ...) is written here. The table is write-optimized and
+    meant to grow unboundedly; plan to partition it by ``occurred_at`` at
+    scale. Aggregations (counters, time series) read from this log or from
+    the denormalized ``view_sessions`` table.
+    """
+
+    __tablename__ = "content_events"
+    __table_args__ = (
+        sqlalchemy.Index(
+            "ix_content_events_content_event_occurred",
+            "content_id", "event_type", "occurred_at",
+        ),
+        sqlalchemy.Index(
+            "ix_content_events_user_occurred",
+            "user_id", "occurred_at",
+        ),
+        sqlalchemy.Index(
+            "ix_content_events_creator_event",
+            "creator_id", "event_type",
+        ),
+        sqlalchemy.Index(
+            "ix_content_events_type_occurred",
+            "event_type", "occurred_at",
+        ),
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    # Client-generated idempotency token so network retries never double count.
+    client_event_id = Column(String(64), nullable=True, unique=True, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    # Polymorphic content reference (video / reel / post / story / live / media).
+    content_type = Column(String(20), nullable=False)
+    content_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    # Denormalized so "follow after viewing" and creator analytics need no join.
+    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    event_type = Column(String(30), nullable=False, index=True)
+    # Correlation id that groups view_start / watch_time / percentage / completion.
+    view_session_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    # Payload value, e.g. watch_time -> seconds, view_percentage -> 0-100.
+    value = Column(Float, nullable=True)
+    position_seconds = Column(Float, nullable=True)
+    context = Column(String(50), nullable=True)  # feed, profile, search, related, ...
+    source = Column(String(50), nullable=True)   # for_you, following, trending, ...
+    metadata_json = Column(Text, nullable=True)
+    # Client-reported event time (as opposed to server receipt created_at).
+    occurred_at = Column(DateTime(timezone=True), nullable=False, index=True)
+
+    user = relationship("User", foreign_keys=[user_id], backref="content_events")
+    creator = relationship("User", foreign_keys=[creator_id], backref="content_event_creations")
+
+
+class ViewSession(Base, TimestampMixin):
+    """Denormalized aggregate of a single viewing session.
+
+    Upserted while ingesting events so watch time / percentage / completion
+    for a ``view_session_id`` are available without scanning the raw log.
+    """
+
+    __tablename__ = "view_sessions"
+    __table_args__ = (
+        sqlalchemy.Index(
+            "ix_view_sessions_content_id",
+            "content_id",
+        ),
+        sqlalchemy.Index(
+            "ix_view_sessions_user_started",
+            "user_id", "started_at",
+        ),
+    )
+
+    # Client-generated id, shared with the ContentEvent.view_session_id.
+    id = Column(UUID(as_uuid=True), primary_key=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    content_type = Column(String(20), nullable=False)
+    content_id = Column(UUID(as_uuid=True), nullable=False)
+    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    context = Column(String(50), nullable=True)
+    source = Column(String(50), nullable=True)
+    started_at = Column(DateTime(timezone=True), nullable=False)
+    last_activity_at = Column(DateTime(timezone=True), nullable=False)
+    watch_time_seconds = Column(Float, default=0.0, nullable=False)
+    view_percentage = Column(Float, default=0.0, nullable=False)
+    views_count = Column(Integer, default=0, nullable=False)
+    replays_count = Column(Integer, default=0, nullable=False)
+    completed = Column(Boolean, default=False, nullable=False)
+    skipped = Column(Boolean, default=False, nullable=False)
+
+    user = relationship("User", foreign_keys=[user_id], backref="view_sessions")
+    creator = relationship("User", foreign_keys=[creator_id], backref="created_view_sessions")
+
+
+# ============================================================
+# User Interest Profile Models
+# ============================================================
+
+class InterestProfile(Base, TimestampMixin):
+    """Per-user aggregate holding the incremental-processing watermark.
+
+    ``last_occurred_at``/``last_event_id`` form an ordered (occurred_at, id)
+    watermark so the interest build job only consumes newly arrived events.
+    """
+
+    __tablename__ = "interest_profiles"
+
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    computed_at = Column(DateTime(timezone=True), nullable=False,
+                         default=lambda: datetime.now(timezone.utc))
+    last_occurred_at = Column(DateTime(timezone=True), nullable=True)
+    last_event_id = Column(UUID(as_uuid=True), nullable=True)
+    total_interests = Column(Integer, default=0, nullable=False)
+    version = Column(Integer, default=1, nullable=False)
+
+    user = relationship("User", backref="interest_profile", uselist=False)
+
+
+class UserInterest(Base, TimestampMixin):
+    """One row per (user, interest dimension) with a decaying strength score."""
+
+    __tablename__ = "user_interests"
+    __table_args__ = (
+        sqlalchemy.UniqueConstraint(
+            "user_id", "interest_type", "interest_key",
+            name="uq_user_interests_user_type_key",
+        ),
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    interest_type = Column(String(20), nullable=False)  # category, tag, creator, topic
+    interest_key = Column(String(255), nullable=False)
+    interest_name = Column(String(255), nullable=True)
+    entity_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    strength = Column(Float, default=0.0, nullable=False)
+    positive_signals = Column(Integer, default=0, nullable=False)
+    negative_signals = Column(Integer, default=0, nullable=False)
+    total_signals = Column(Integer, default=0, nullable=False)
+    first_seen_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    last_interaction_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    user = relationship("User", backref="user_interests")
+
+
+class InterestEventSignal(Base, TimestampMixin):
+    """Audit trail / derived feature store: one row per (event, dimension).
+
+    Lets Phase 3+ re-derive or explain profiles without re-reading raw event
+    payloads, and makes incremental processing observable.
+    """
+
+    __tablename__ = "interest_event_signals"
+    __table_args__ = (
+        sqlalchemy.UniqueConstraint(
+            "event_id", "interest_type", "interest_key",
+            name="uq_interest_event_signals_event_dim",
+        ),
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    event_id = Column(UUID(as_uuid=True), ForeignKey("content_events.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    interest_type = Column(String(20), nullable=False)
+    interest_key = Column(String(255), nullable=False)
+    interest_name = Column(String(255), nullable=True)
+    entity_id = Column(UUID(as_uuid=True), nullable=True)
+    delta = Column(Float, default=0.0, nullable=False)
+    base_event_type = Column(String(30), nullable=False)
+    occurred_at = Column(DateTime(timezone=True), nullable=False)
+
+    user = relationship("User", backref="interest_event_signals")
+    event = relationship("ContentEvent", backref="interest_signals")
+
+
+# ============================================================
+# Content Profile Models
+# ============================================================
+
+class ContentProfile(Base, TimestampMixin):
+    """Machine-readable profile for any content item.
+
+    One row per (content_type, content_id) holding the derived attributes used
+    by ranking / filtering later: category, tags, topics, language, creator,
+    media type, duration and publish time. Built from the content's own row
+    plus its media, category and hashtags.
+    """
+
+    __tablename__ = "content_profiles"
+    __table_args__ = (
+        sqlalchemy.UniqueConstraint(
+            "content_type", "content_id",
+            name="uq_content_profiles_type_id",
+        ),
+    )
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    content_type = Column(String(20), nullable=False, index=True)  # video, post, reel, story, live
+    content_id = Column(UUID(as_uuid=True), nullable=False, index=True)
+    creator_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    title = Column(String(500), nullable=True)
+    category_id = Column(UUID(as_uuid=True), nullable=True)
+    category_name = Column(String(100), nullable=True)
+    tags_json = Column(Text, nullable=True)      # JSON array of tag names
+    topics_json = Column(Text, nullable=True)    # JSON array of topic tokens
+    language = Column(String(10), nullable=True)
+    media_type = Column(String(30), nullable=True)  # video, image, audio, text, gif, document, live
+    mime_type = Column(String(100), nullable=True)
+    duration_seconds = Column(Float, nullable=True)
+    published_at = Column(DateTime(timezone=True), nullable=True, index=True)
+    source_updated_at = Column(DateTime(timezone=True), nullable=True)
+    version = Column(Integer, default=1, nullable=False)
+    # Computed metrics (configurable formulas, see core/metrics_config.py).
+    popularity_score = Column(Float, default=0.0, nullable=False, index=True)
+    quality_score = Column(Float, default=0.0, nullable=False, index=True)
+    freshness_score = Column(Float, default=0.0, nullable=False, index=True)
+    metrics_updated_at = Column(DateTime(timezone=True), nullable=True)
+
+    creator = relationship("User", backref="content_profiles")
+
+
+class MetricsState(Base, TimestampMixin):
+    """Single-row watermark for the incremental content metrics job."""
+
+    __tablename__ = "metrics_state"
+
+    id = Column(Integer, primary_key=True, default=1)
+    last_occurred_at = Column(DateTime(timezone=True), nullable=True)
+    last_event_id = Column(UUID(as_uuid=True), nullable=True)
