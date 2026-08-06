@@ -50,7 +50,7 @@ export function SetupUsernamePage() {
           controller.signal
         );
         if (!controller.signal.aborted) {
-          setStatus(data.available ? "available" : "taken");
+          setStatus(data && data.available ? "available" : "taken");
         }
       } catch (err) {
         if (err instanceof DOMException && err.name === "AbortError") return;

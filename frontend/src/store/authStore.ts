@@ -29,8 +29,8 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
         try {
           const { data } = await authApi.googleLogin(credential);
-          localStorage.setItem("access_token", data.access_token);
-          localStorage.setItem("refresh_token", data.refresh_token);
+          if (data?.access_token) localStorage.setItem("access_token", data.access_token);
+          if (data?.refresh_token) localStorage.setItem("refresh_token", data.refresh_token);
           set({ isAuthenticated: true, isLoading: false });
           await get().fetchUser();
         } catch (error) {

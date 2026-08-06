@@ -2,12 +2,14 @@ import axios from "axios";
 import type { User, TokenResponse, Device, LoginHistory } from "@/types";
 
 const apiClient = axios.create({
-  baseURL: "/api/v1",
+  baseURL: import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL.replace(/\/+$/, "")}/api/v1`
+    : "/api/v1",
 });
 
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("access_token");
-  if (token) {
+  if (token && token !== "undefined") {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -25,8 +27,8 @@ apiClient.interceptors.response.use(
           const { data } = await axios.post("/api/v1/auth/refresh", null, {
             params: { refresh_token: refreshToken },
           });
-          localStorage.setItem("access_token", data.access_token);
-          localStorage.setItem("refresh_token", data.refresh_token);
+          if (data?.access_token) localStorage.setItem("access_token", data.access_token);
+          if (data?.refresh_token) localStorage.setItem("refresh_token", data.refresh_token);
           originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
           return apiClient(originalRequest);
         } catch {
