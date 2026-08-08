@@ -20,18 +20,18 @@ export function HashtagCard({ hashtag, index = 0 }: HashtagCardProps) {
         to={`/hashtags/${hashtag.name}`}
         className="block rounded-2xl glass-card p-4 transition-colors hover:bg-muted/50"
       >
-        <div className="flex items-start gap-4">
+        <div className="flex items-start gap-4 flex-wrap">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
             <Hash className="h-6 w-6 text-primary" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-base font-bold">#{hashtag.name}</p>
+            <p className="text-base font-bold break-words">#{hashtag.name}</p>
             {hashtag.description && (
-              <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2">
+              <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2 break-words">
                 {hashtag.description}
               </p>
             )}
-            <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <FileText className="h-3.5 w-3.5" />
                 {hashtag.posts_count} {hashtag.posts_count === 1 ? "post" : "posts"}
@@ -42,11 +42,13 @@ export function HashtagCard({ hashtag, index = 0 }: HashtagCardProps) {
               </span>
             </div>
           </div>
-          <FollowButton
-            hashtagName={hashtag.name}
-            isFollowing={hashtag.is_following}
-            size="sm"
-          />
+          <span className="shrink-0">
+            <FollowButton
+              hashtagName={hashtag.name}
+              isFollowing={hashtag.is_following}
+              size="sm"
+            />
+          </span>
         </div>
       </Link>
     </motion.div>

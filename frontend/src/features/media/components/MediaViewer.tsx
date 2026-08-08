@@ -129,13 +129,13 @@ export function MediaViewer({
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex flex-col bg-black/95"
       >
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <p className="text-sm text-white/80">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <p className="shrink-0 text-sm text-white/80">
               {currentIndex + 1} / {media.length}
             </p>
             {currentMedia.original_name && (
-              <p className="text-sm text-white/50">
+              <p className="min-w-0 truncate text-sm text-white/50">
                 {currentMedia.original_name}
               </p>
             )}

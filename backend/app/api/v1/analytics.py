@@ -16,6 +16,17 @@ def get_overview(
     return AnalyticsService(db).get_overview(user_id)
 
 
+@router.get("/events")
+def get_event_analytics(
+    days: int = Query(30, ge=1, le=365),
+    user_id: UUID = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    """Event-log analytics (impressions, views, watch time, CTR, engagement)
+    for content the authenticated creator owns."""
+    return AnalyticsService(db).get_events(user_id, days)
+
+
 @router.get("/profile-views")
 def get_profile_views(
     days: int = Query(30, ge=1, le=365),

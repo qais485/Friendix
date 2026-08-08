@@ -83,7 +83,7 @@ export function PostcardAppearanceView() {
   return (
     <div className="space-y-4">
       <Card>
-        <CardContent className="space-y-6 p-5">
+        <CardContent className="space-y-6 p-4 sm:p-5">
           {(["header", "footer"] as const).map((barKey) => (
             <div key={barKey} className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
@@ -151,7 +151,7 @@ export function PostcardAppearanceView() {
         </CardContent>
       </Card>
 
-      <div className="flex items-center justify-end gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <Button variant="outline" size="sm" onClick={() => setForm({ header: { mode: "glass", color: DEFAULT_COLOR }, footer: { mode: "glass", color: DEFAULT_COLOR } })}>
           <RotateCcw className="mr-1.5 h-4 w-4" /> Reset
         </Button>

@@ -173,6 +173,15 @@ export function LiquidGlassActiveIndicator({
     const w = activeRect.width;
     const h = activeRect.height;
 
+    // Hidden elements (e.g. sidebar `display: none` below the md breakpoint)
+    // report a 0x0 rect. Rendering the liquid-glass filter for a zero-sized
+    // surface throws `IndexSizeError` from `new ImageData(0, 0)`, so hold the
+    // geometry until the element is actually measurable again.
+    if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) {
+      setGeometry(null);
+      return;
+    }
+
     top.set(t);
     left.set(l);
     width.set(w);

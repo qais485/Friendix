@@ -1,111 +1,121 @@
-# # =========================
-# # Environment Variables
-# # =========================
-# .env
-# .env.*
-# !.env.example
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.*
+!.env.example
 
-# # =========================
-# # Python
-# # =========================
-# __pycache__/
-# *.py[cod]
-# *$py.class
-# *.so
 
-# .venv/
-# venv/
-# env/
-# ENV/
+# =========================
+# Python Backend
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
 
-# .Python
-# build/
-# dist/
-# develop-eggs/
-# downloads/
-# eggs/
-# .eggs/
-# parts/
-# sdist/
-# var/
-# wheels/
-# pip-wheel-metadata/
+*.so
 
-# *.egg-info/
-# .installed.cfg
-# *.egg
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
 
-# # =========================
-# # Database
-# # =========================
-# *.sqlite3
-# *.db
+*.egg-info/
+.installed.cfg
+*.egg
 
-# # =========================
-# # React / Node
-# # =========================
-# node_modules/
-# .vite/
-# .cache/
-# coverage/
 
-# # Build outputs
-# frontend/dist/
-# backend/dist/
-# build/
+# Virtual Environments
+.venv/
+venv/
+env/
+ENV/
 
-# # =========================
-# # Logs
-# # =========================
-# *.log
-# logs/
 
-# # =========================
-# # IDE
-# # =========================
-# .vscode/
-# .idea/
-# *.swp
-# *.swo
+# =========================
+# FastAPI / Database
+# =========================
+*.sqlite3
+*.db
 
-# # =========================
-# # OS
-# # =========================
-# .DS_Store
-# Thumbs.db
+alembic/versions/__pycache__/
 
-# # =========================
-# # Testing
-# # =========================
-# .pytest_cache/
-# .coverage
-# htmlcov/
 
-# # =========================
-# # Temporary Files
-# # =========================
-# *.tmp
-# *.temp
+# =========================
+# React Frontend
+# =========================
+node_modules/
+dist/
+build/
 
-# # =========================
-# # Secrets
-# # =========================
-# secrets/
-# credentials/
-# *.pem
-# *.key
+.vite/
+.cache/
 
-# # =========================
-# # Personal / Local folders
-# # =========================
-# .opencode/
-# Buges/
-# graphify-out/
-# Rules/
-# UI images/
 
-# # =========================
-# # Documentation (optional)
-# # =========================
-# # Uncomment if you don't want to commit markdown files
-# # *.md
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+
+*.swp
+*.swo
+
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+
+# =========================
+# Testing
+# =========================
+.pytest_cache/
+.coverage
+htmlcov/
+
+
+# =========================
+# AI / Temporary Files
+# =========================
+graphify-out/
+*.tmp
+*.temp
+
+
+# =========================
+# Project Secrets
+# =========================
+secrets/
+credentials/
+*.pem
+*.key
+
+# Internal folders
+.opencode/
+Buges/
+graphify-out/
+Rules/
+UI images/
+
+# Root markdown files (اگر همه md های root را نمی‌خواهی)
+*.md

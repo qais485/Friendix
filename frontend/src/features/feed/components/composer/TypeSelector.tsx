@@ -17,7 +17,7 @@ const ICONS = {
 
 export function TypeSelector({ activeType, onSelect, onPickMedia }: TypeSelectorProps) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center gap-1">
       {POST_TYPES.map((type) => {
         const value = type.value as "text" | "image" | "video" | "poll";
         const Icon = ICONS[value];

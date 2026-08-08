@@ -27,6 +27,11 @@ export const feedApi = {
       params: { cursor, limit },
     }),
 
+  getForYouPosts: (cursor?: string, limit?: number) =>
+    api.get<FeedResponse>("/feed/for-you/posts", {
+      params: { cursor, limit },
+    }),
+
   getFollowingFeed: (cursor?: string, limit?: number) =>
     api.get<FeedResponse>("/feed/following", {
       params: { cursor, limit },

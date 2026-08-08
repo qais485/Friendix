@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useJoinStream, useLeaveStream } from "../hooks";
+import { tracking } from "@/services/tracking";
 import type { LiveStream } from "@/types";
 
 interface LiveStreamPlayerProps {
@@ -14,12 +15,30 @@ export function LiveStreamPlayer({ stream, isHost }: LiveStreamPlayerProps) {
 
   useEffect(() => {
     if (stream.status === "live" && !isHost && !hasJoined) {
-      joinStream.mutateAsync(stream.id).then(() => setHasJoined(true)).catch(() => {});
+      joinStream.mutateAsync(stream.id)
+        .then(() => {
+          setHasJoined(true);
+          tracking.viewStart({
+            content_type: "live",
+            content_id: stream.id,
+            creator_id: stream.user_id,
+            context: "live",
+          });
+        })
+        .catch(() => {});
     }
     return () => {
-      if (hasJoined) leaveStream.mutateAsync(stream.id).catch(() => {});
+      if (hasJoined) {
+        tracking.completion({
+          content_type: "live",
+          content_id: stream.id,
+          creator_id: stream.user_id,
+          context: "live",
+        });
+        leaveStream.mutateAsync(stream.id).catch(() => {});
+      }
     };
-  }, [stream.status, stream.id, isHost, hasJoined, joinStream, leaveStream]);
+  }, [stream.status, stream.id, isHost, hasJoined, joinStream, leaveStream, stream.user_id]);
 
   const getStatusBadge = () => {
     switch (stream.status) {
@@ -38,7 +57,7 @@ export function LiveStreamPlayer({ stream, isHost }: LiveStreamPlayerProps) {
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-foreground/5">
-      <div className="aspect-video flex items-center justify-center bg-muted">
+      <div className="aspect-video flex items-center justify-center bg-muted px-4">
         {stream.status === "live" || stream.status === "recording" ? (
           <div className="text-center">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-500">
@@ -70,7 +89,7 @@ export function LiveStreamPlayer({ stream, isHost }: LiveStreamPlayerProps) {
               </svg>
             </div>
             <p className="font-semibold">Scheduled Stream</p>
-            {stream.scheduled_at && <p className="mt-1 text-sm text-muted-foreground">Starts at {new Date(stream.scheduled_at).toLocaleString()}</p>}
+            {stream.scheduled_at && <p className="mt-1 break-words text-sm text-muted-foreground">Starts at {new Date(stream.scheduled_at).toLocaleString()}</p>}
           </div>
         ) : (
           <div className="text-center">
@@ -80,7 +99,7 @@ export function LiveStreamPlayer({ stream, isHost }: LiveStreamPlayerProps) {
               </svg>
             </div>
             <p className="font-semibold">Stream Ended</p>
-            {stream.ended_at && <p className="mt-1 text-sm text-muted-foreground">Ended at {new Date(stream.ended_at).toLocaleString()}</p>}
+            {stream.ended_at && <p className="mt-1 break-words text-sm text-muted-foreground">Ended at {new Date(stream.ended_at).toLocaleString()}</p>}
           </div>
         )}
       </div>

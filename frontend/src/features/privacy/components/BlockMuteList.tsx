@@ -46,9 +46,9 @@ export function BlockMuteList({ users, type, isLoading, onRemove, isRemoving }: 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="flex items-center justify-between rounded-2xl glass-card p-3"
+            className="flex items-center justify-between gap-3 rounded-2xl glass-card p-3"
           >
-            <div className="flex items-center gap-3">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
               {user.avatar_url ? (
                 <img
                   src={getCloudinaryTransformedUrl(user.avatar_url, "avatar")}
@@ -57,19 +57,19 @@ export function BlockMuteList({ users, type, isLoading, onRemove, isRemoving }: 
                   height={40}
                   loading="lazy"
                   decoding="async"
-                  className="h-10 w-10 rounded-full object-cover"
+                  className="h-10 w-10 shrink-0 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/15 text-sm font-semibold text-primary">
                   {(user.full_name || user.username || "U")[0].toUpperCase()}
                 </div>
               )}
-              <div>
-                <p className="text-sm font-semibold">{user.full_name || "User"}</p>
-                {user.username && <p className="text-xs text-muted-foreground">@{user.username}</p>}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{user.full_name || "User"}</p>
+                {user.username && <p className="truncate text-xs text-muted-foreground">@{user.username}</p>}
               </div>
             </div>
-            <Button variant="ghost" size="sm" className="rounded-full" onClick={() => onRemove(user.id)} disabled={isRemoving}>
+            <Button variant="ghost" size="sm" className="shrink-0 rounded-full" onClick={() => onRemove(user.id)} disabled={isRemoving}>
               {isRemoving ? <Loader2 className="h-4 w-4 animate-spin" /> : config.removeLabel}
             </Button>
           </motion.div>

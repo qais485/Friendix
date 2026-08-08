@@ -98,7 +98,7 @@ export function CreateReel({ onClose, onCreated }: CreateReelProps) {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="relative w-full max-w-lg rounded-2xl bg-background p-6 shadow-2xl"
+        className="relative w-full max-w-lg rounded-2xl bg-background p-6 shadow-2xl max-h-[90vh] overflow-y-auto"
       >
         <Button
           variant="ghost"
@@ -174,7 +174,7 @@ export function CreateReel({ onClose, onCreated }: CreateReelProps) {
 
               <div className="space-y-2">
                 <label className="text-sm font-medium">Privacy</label>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {PRIVACY_OPTIONS.map((option) => (
                     <Button
                       key={option.value}

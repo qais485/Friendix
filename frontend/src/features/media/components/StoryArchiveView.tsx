@@ -83,7 +83,7 @@ export function StoryArchiveView({ userId, onViewStory }: StoryArchiveViewProps)
                   </div>
                 )}
               </button>
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute right-1 top-1 flex gap-1 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                 <div className="flex gap-1">
                   <button
                     onClick={() => handleUnarchive(story.id)}

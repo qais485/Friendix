@@ -72,19 +72,19 @@ export function ProfileHeader({ profile, isOwn, onEditCover, onEditAvatar }: Pro
             )}
           </div>
 
-          <div className="flex-1 pb-2 text-center sm:text-left">
-            <div className="flex items-center justify-center gap-2 sm:justify-start">
-              <h1 className="text-2xl font-black tracking-tight">
+          <div className="min-w-0 flex-1 pb-2 text-center sm:text-left">
+            <div className="flex min-w-0 items-center justify-center gap-2 sm:justify-start">
+              <h1 className="min-w-0 break-words text-2xl font-black tracking-tight">
                 {profile.full_name || "User"}
               </h1>
               {profile.is_verified && (
-                <Badge variant="info" className="rounded-full text-xs">
+                <Badge variant="info" className="shrink-0 rounded-full text-xs">
                   Verified
                 </Badge>
               )}
             </div>
             {profile.username && (
-              <p className="text-muted-foreground">@{profile.username}</p>
+              <p className="truncate text-muted-foreground">@{profile.username}</p>
             )}
           </div>
         </div>

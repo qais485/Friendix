@@ -122,22 +122,22 @@ export function ProfileQRCode({ profile }: ProfileQRCodeProps) {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col items-center gap-4 rounded-2xl glass-card p-6"
+      className="flex w-full flex-col items-center gap-4 rounded-2xl glass-card p-4 sm:p-6"
     >
       <h3 className="text-lg font-bold">Profile QR Code</h3>
-      <p className="text-sm text-muted-foreground text-center">
+      <p className="text-center text-sm text-muted-foreground">
         Scan to visit profile
       </p>
 
       <div className="rounded-xl border bg-white p-4 shadow-sm">
-        <canvas ref={canvasRef} className="block" />
+        <canvas ref={canvasRef} className="block max-w-full" />
       </div>
 
-      <p className="max-w-xs truncate text-xs text-muted-foreground">
+      <p className="max-w-full break-all text-center text-xs text-muted-foreground">
         {profileUrl}
       </p>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap justify-center gap-2">
         <Button variant="outline" size="sm" onClick={handleDownload}>
           <Download className="mr-2 h-4 w-4" />
           Download

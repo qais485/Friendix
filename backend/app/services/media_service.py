@@ -8,6 +8,7 @@ from fastapi import HTTPException, status
 from app.core.config import get_settings
 from app.repositories.media_repository import MediaRepository
 from app.repositories.feed_repository import FeedRepository
+from app.services.content_profile_sync import drop_content_profile, sync_content_profile
 from app.schemas.media import (
     MediaUpload,
     MediaUpdate,
@@ -215,6 +216,7 @@ class MediaService:
             background_color=data.background_color,
             story_type=data.story_type,
         )
+        sync_content_profile(self.db, "story", story.id)
         return self._story_to_response(story)
 
     def get_active_stories(self, user_ids: list[UUID], viewer_id: UUID | None = None) -> list[StoryResponse]:
@@ -260,6 +262,7 @@ class MediaService:
             raise HTTPException(status_code=404, detail="Story not found")
         if story.user_id != user_id:
             raise HTTPException(status_code=403, detail="Not authorized")
+        drop_content_profile(self.db, "story", story_id)
         self.media_repo.delete_story(story)
         return True
 
@@ -279,6 +282,7 @@ class MediaService:
             height=media.height,
             privacy=data.privacy,
         )
+        sync_content_profile(self.db, "reel", reel.id)
         return self._reel_to_response(reel)
 
     def get_reel(self, reel_id: UUID, viewer_id: UUID | None = None) -> ReelResponse:
@@ -316,6 +320,7 @@ class MediaService:
             raise HTTPException(status_code=403, detail="Not authorized")
         update_data = data.model_dump(exclude_unset=True)
         updated = self.media_repo.update_reel(reel, **update_data)
+        sync_content_profile(self.db, "reel", reel_id)
         return self._reel_to_response(updated)
 
     def delete_reel(self, user_id: UUID, reel_id: UUID) -> bool:
@@ -324,6 +329,7 @@ class MediaService:
             raise HTTPException(status_code=404, detail="Reel not found")
         if reel.user_id != user_id:
             raise HTTPException(status_code=403, detail="Not authorized")
+        drop_content_profile(self.db, "reel", reel_id)
         self.media_repo.delete_reel(reel)
         return True
 

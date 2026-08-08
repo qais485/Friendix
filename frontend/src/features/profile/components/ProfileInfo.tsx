@@ -56,7 +56,7 @@ export function ProfileInfo({ profile }: ProfileInfoProps) {
     <div className="space-y-5">
       {profile.bio && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-          <p className="text-sm leading-relaxed text-muted-foreground">{profile.bio}</p>
+          <p className="break-words whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">{profile.bio}</p>
         </motion.div>
       )}
 
@@ -86,13 +86,13 @@ export function ProfileInfo({ profile }: ProfileInfoProps) {
       </div>
 
       {profile.website && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex items-center gap-3">
-          <Globe className="h-4 w-4 text-muted-foreground" />
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex min-w-0 items-center gap-3">
+          <Globe className="h-4 w-4 shrink-0 text-muted-foreground" />
           <a
             href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-primary hover:underline"
+            className="min-w-0 break-words text-sm font-medium text-primary hover:underline"
           >
             {profile.website}
           </a>

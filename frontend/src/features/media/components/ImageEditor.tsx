@@ -161,8 +161,8 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
         </div>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-1 items-center justify-center p-4">
+      <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
+        <div className="flex min-h-0 flex-1 items-center justify-center p-4">
           <div className="relative overflow-hidden rounded-lg bg-[conic-gradient(from_0deg,#ccc_0 90deg,#999_90deg_180deg,#ccc_180deg_270deg,#999_270deg)]">
             <OptimizedImage
               src={imageUrl}
@@ -178,16 +178,16 @@ export function ImageEditor({ imageUrl, onSave, onCancel }: ImageEditorProps) {
           </div>
         </div>
 
-        <div className="w-72 border-l bg-background p-4">
+        <div className="w-full overflow-y-auto border-t bg-background p-4 md:w-72 md:border-l md:border-t-0">
           <h3 className="mb-4 text-sm font-medium">Tools</h3>
 
-          <div className="space-y-1">
+          <div className="flex flex-wrap gap-1.5 sm:block sm:space-y-1">
             {tools.map((tool) => (
               <Button
                 key={tool.id}
                 variant={activeTool === tool.id ? "default" : "ghost"}
                 size="sm"
-                className="w-full justify-start"
+                className="flex-1 justify-start sm:w-full sm:flex-none"
                 onClick={() =>
                   setActiveTool(activeTool === tool.id ? null : tool.id)
                 }

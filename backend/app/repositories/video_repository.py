@@ -68,6 +68,17 @@ class VideoRepository:
             .first()
         )
 
+    def get_videos_by_ids(self, video_ids: list[UUID]) -> list[Video]:
+        """Fetch many videos in one query with author + category pre-loaded."""
+        if not video_ids:
+            return []
+        return (
+            self.db.query(Video)
+            .options(joinedload(Video.user), joinedload(Video.category))
+            .filter(Video.id.in_(video_ids), Video.is_archived == False)
+            .all()
+        )
+
     def update_video(self, video: Video, **kwargs) -> Video:
         for k, v in kwargs.items():
             if v is not None:
@@ -155,6 +166,15 @@ class VideoRepository:
     def is_liked(self, user_id: UUID, video_id: UUID) -> bool:
         return self.db.query(VideoLike).filter(VideoLike.user_id == user_id, VideoLike.video_id == video_id).first() is not None
 
+    def get_liked_video_ids(self, user_id: UUID, video_ids: list[UUID]) -> list[UUID]:
+        """Batch variant of :meth:`is_liked` (single query, no N+1)."""
+        if not video_ids:
+            return []
+        rows = self.db.query(VideoLike.video_id).filter(
+            VideoLike.user_id == user_id, VideoLike.video_id.in_(video_ids)
+        ).all()
+        return [r[0] for r in rows]
+
     # ── Comments ───────────────────────────────────────────
 
     def create_comment(self, user_id: UUID, video_id: UUID, content: str, parent_id: UUID | None = None) -> VideoComment:
@@ -209,6 +229,15 @@ class VideoRepository:
 
     def is_watch_later(self, user_id: UUID, video_id: UUID) -> bool:
         return self.db.query(WatchLater).filter(WatchLater.user_id == user_id, WatchLater.video_id == video_id).first() is not None
+
+    def get_watch_later_video_ids(self, user_id: UUID, video_ids: list[UUID]) -> list[UUID]:
+        """Batch variant of :meth:`is_watch_later` (single query, no N+1)."""
+        if not video_ids:
+            return []
+        rows = self.db.query(WatchLater.video_id).filter(
+            WatchLater.user_id == user_id, WatchLater.video_id.in_(video_ids)
+        ).all()
+        return [r[0] for r in rows]
 
     def get_watch_later(self, user_id: UUID, limit: int = 50) -> list[WatchLater]:
         return (

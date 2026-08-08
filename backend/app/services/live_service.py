@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.repositories.live_repository import LiveRepository
 from app.repositories.profile_repository import ProfileRepository
+from app.services.content_profile_sync import drop_content_profile, sync_content_profile
 from app.schemas.live import (
     LiveStreamCreate,
     LiveStreamUpdate,
@@ -165,6 +166,7 @@ class LiveService:
             kwargs["status"] = "live"
             kwargs["started_at"] = datetime.now(timezone.utc)
         stream = self.live_repo.create_stream(user_id, stream_key, **kwargs)
+        sync_content_profile(self.db, "live", stream.id)
         return self._enrich_stream(stream)
 
     def get_stream(self, stream_id: UUID, viewer_id: UUID | None = None) -> LiveStreamResponse:
@@ -192,6 +194,7 @@ class LiveService:
             raise HTTPException(status_code=403, detail="Not authorized")
         update_data = data.model_dump(exclude_unset=True)
         updated = self.live_repo.update_stream(stream, **update_data)
+        sync_content_profile(self.db, "live", stream_id)
         return self._enrich_stream(updated)
 
     def delete_stream(self, user_id: UUID, stream_id: UUID) -> bool:
@@ -200,6 +203,7 @@ class LiveService:
             raise HTTPException(status_code=404, detail="Stream not found")
         if stream.user_id != user_id:
             raise HTTPException(status_code=403, detail="Not authorized")
+        drop_content_profile(self.db, "live", stream_id)
         self.live_repo.delete_stream(stream)
         return True
 

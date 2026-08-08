@@ -93,10 +93,10 @@ export function UsernameEditor({
       <label className="text-sm font-medium text-muted-foreground">Username</label>
 
       {!isEditing ? (
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-1.5 rounded-xl glass-card px-3 py-2">
-            <AtSign className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex min-w-0 items-center gap-1.5 rounded-xl glass-card px-3 py-2">
+            <AtSign className="h-4 w-4 shrink-0 text-muted-foreground" />
+            <span className="truncate font-semibold">
               {currentUsername || "Not set"}
             </span>
           </div>
@@ -115,7 +115,7 @@ export function UsernameEditor({
           className="space-y-2"
         >
           <div className="flex items-center gap-2">
-            <div className="relative flex-1">
+            <div className="relative min-w-0 flex-1">
               <AtSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={username}

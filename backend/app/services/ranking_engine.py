@@ -89,7 +89,10 @@ class RankingEngine:
             "saves": round(_sat(_rate(engagement.get("saves") or 0, views), cfg.RATE_SATURATION), 4),
             # Content dynamics (Phase 3).
             "freshness": round(min(1.0, content.get("freshness_score") or 0.0), 4),
-            "popularity": round(_sat(content.get("popularity_score") or 0.0, cfg.POPULARITY_SATURATION), 4),
+            # Reach-only popularity: log-normalized view volume. Using raw views
+            # (not the engagement-weighted popularity_score) keeps reach distinct
+            # from the rate-based engagement signals, avoiding double counting.
+            "popularity": round(min(1.0, math.log1p(views) / math.log1p(cfg.VOLUME_REF)), 4),
             "quality": round(min(1.0, content.get("quality_score") or 0.0), 4),
             # Personalization (filled in score_item when interests are present).
             "interest": 0.0,

@@ -93,7 +93,7 @@ export function ChatHeader({ conversation, onBack }: ChatHeaderProps) {
   };
 
   return (
-    <div className="flex items-center gap-3 border-b px-4 py-3">
+    <div className="flex items-center gap-2 border-b px-3 py-3 sm:gap-3 sm:px-4">
       {onBack && (
         <button
           onClick={onBack}
@@ -167,7 +167,7 @@ export function ChatHeader({ conversation, onBack }: ChatHeaderProps) {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="absolute right-0 top-full z-50 mt-1 w-56 rounded-2xl glass-card"
+                className="absolute right-0 top-full z-50 mt-1 w-56 max-w-[calc(100vw-2rem)] rounded-2xl glass-card"
               >
                 {!conversation.is_group && otherUserId && (
                   <>

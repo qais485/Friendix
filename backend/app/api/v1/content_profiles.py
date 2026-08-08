@@ -9,6 +9,7 @@ from app.database.base import get_db
 from app.schemas.content_profile import (
     CONTENT_PROFILE_TYPES,
     ContentMetricsRefreshResponse,
+    ContentProfileBackfillResponse,
     ContentProfileListResponse,
     ContentProfileRefreshResponse,
     ContentProfileResponse,
@@ -108,6 +109,24 @@ def refresh_all_types(
     for content_type in CONTENT_PROFILE_TYPES:
         total += ContentProfileService(db).build_recent(content_type, limit_per_type)
     return ContentProfileRefreshResponse(content_type="all", built=total)
+
+
+@router.post("/backfill", response_model=ContentProfileBackfillResponse)
+def backfill_profiles(
+    content_type: str | None = Query(None),
+    limit_per_type: int = Query(default=500, ge=1, le=20000),
+    prune: bool = Query(default=True),
+    user_id: UUID = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+):
+    """Admin-only: full backfill of content profiles for all types (or one)."""
+    if not is_admin(db, user_id):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    types = None
+    if content_type is not None:
+        _check_type(content_type)
+        types = [content_type]
+    return ContentProfileService(db).backfill(types, limit_per_type, prune)
 
 
 @router.post("/metrics/refresh", response_model=ContentMetricsRefreshResponse)

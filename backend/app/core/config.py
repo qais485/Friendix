@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        # The recommendation subsystem (FRIENDIX_* prefixed) reads its own env
+        # via dedicated Settings classes. Ignore those keys here so they do not
+        # break app startup as "extra inputs".
+        extra = "ignore"
 
 
 @lru_cache()

@@ -105,7 +105,77 @@ export function UserManagement() {
           <p className="mt-2 text-sm text-muted-foreground">No users found.</p>
         </Card>
       ) : (
-        <Card>
+        <>
+          <div className="space-y-3 md:hidden">
+            {users.map((user) => (
+              <Card key={user.id}>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={getCloudinaryTransformedUrl(user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || user.username || "U")}`, "avatar")}
+                      alt=""
+                      width={40}
+                      height={40}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-10 w-10 shrink-0 rounded-full object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium">{user.full_name || "—"}</p>
+                      <p className="truncate text-xs text-muted-foreground">@{user.username || "—"}</p>
+                    </div>
+                  </div>
+                  <p className="break-words text-sm text-muted-foreground">{user.email}</p>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                    <select
+                      value={user.role}
+                      onChange={(e) => roleMutation.mutate({ userId: user.id, role: e.target.value })}
+                      className="h-8 rounded-md border border-input bg-background px-2 text-xs"
+                    >
+                      {ROLES.map((r) => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </select>
+                    <span
+                      className={cn(
+                        "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                        user.is_active ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"
+                      )}
+                    >
+                      {user.is_active ? "Active" : "Inactive"}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      Joined {formatDistanceToNow(new Date(user.created_at))}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        title={user.is_active ? "Deactivate" : "Activate"}
+                        onClick={() => activeMutation.mutate({ userId: user.id, isActive: !user.is_active })}
+                      >
+                        <UserX className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        title="Ban"
+                        onClick={() => setBanModal(user)}
+                      >
+                        <Ban className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="hidden md:block">
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -190,7 +260,8 @@ export function UserManagement() {
               </tbody>
             </table>
           </CardContent>
-        </Card>
+          </Card>
+        </>
       )}
 
       {hasMore && (

@@ -27,7 +27,7 @@ export function HashtagSearchResults({ hashtags }: HashtagSearchResultsProps) {
               <Hash className="h-5 w-5 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-semibold text-sm">#{hashtag.name}</p>
+              <p className="truncate text-sm font-semibold">#{hashtag.name}</p>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <FileText className="h-3.5 w-3.5" />

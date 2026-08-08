@@ -60,7 +60,7 @@ export function PollPanel({
               value={option}
               onChange={(e) => onChangeOption(index, e.target.value)}
               placeholder={`Option ${index + 1}`}
-              className="flex-1 rounded-lg border bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
+              className="min-w-0 flex-1 rounded-lg border bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground"
             />
             {options.length > 2 && (
               <button
@@ -115,8 +115,8 @@ export function PollPanel({
         </div>
         <div className="rounded-2xl glass-card p-3">
           <div className="flex items-center gap-1.5 text-sm font-bold">
-            <BarChart3 className="h-4 w-4 text-primary" />
-            {question.trim() || "Your question"}
+            <BarChart3 className="h-4 w-4 shrink-0 text-primary" />
+            <span className="break-words">{question.trim() || "Your question"}</span>
           </div>
           <div className="mt-2.5 space-y-1.5">
             {options
@@ -126,7 +126,7 @@ export function PollPanel({
                   key={index}
                   className="rounded-lg border px-3 py-2 text-sm text-muted-foreground"
                 >
-                  {option}
+                  <span className="break-words">{option}</span>
                 </div>
               ))}
             {options.every((o) => o.trim() === "") && (

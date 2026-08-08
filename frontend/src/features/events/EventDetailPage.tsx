@@ -104,20 +104,20 @@ export function EventDetailPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
               </div>
             )}
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               {event.is_cancelled && (
                 <span className="mb-3 inline-block rounded-full bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive">
                   Cancelled
                 </span>
               )}
-              <h1 className="text-2xl font-bold tracking-tight">{event.title}</h1>
+              <h1 className="break-words text-2xl font-bold tracking-tight">{event.title}</h1>
 
               <div className="mt-4 space-y-3 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                     <Calendar className="h-4 w-4 text-primary" />
                   </div>
-                  <span>
+                  <span className="min-w-0 break-words">
                     {startDate.toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
                     {" · "}
                     {startDate.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}
@@ -126,7 +126,7 @@ export function EventDetailPage() {
                 </div>
                 {event.event_type === "online" ? (
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                       <Video className="h-4 w-4 text-primary" />
                     </div>
                     <span>Online Event</span>
@@ -143,21 +143,21 @@ export function EventDetailPage() {
                   </div>
                 ) : event.location ? (
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                       <MapPin className="h-4 w-4 text-primary" />
                     </div>
-                    <span>{event.location}</span>
+                    <span className="min-w-0 break-words">{event.location}</span>
                   </div>
                 ) : null}
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                     <Users className="h-4 w-4 text-primary" />
                   </div>
                   <span>{event.attendees_count} attending · {event.invited_count} invited</span>
                 </div>
                 {event.reminder_minutes > 0 && (
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
                       <Bell className="h-4 w-4 text-primary" />
                     </div>
                     <span>Reminder {event.reminder_minutes >= 60 ? `${event.reminder_minutes / 60}h` : `${event.reminder_minutes}m`} before</span>
@@ -166,7 +166,7 @@ export function EventDetailPage() {
               </div>
 
               {event.description && (
-                <p className="mt-5 text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                <p className="mt-5 break-words text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">
                   {event.description}
                 </p>
               )}

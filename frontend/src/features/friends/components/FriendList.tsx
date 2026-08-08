@@ -67,14 +67,14 @@ export function FriendList({ friends, isLoading, onRemove, onToggleFavorite, onT
                 size="md"
                 showRing={false}
               />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-semibold">{friend.full_name || "Unknown User"}</p>
                   {friend.is_verified && (
-                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">✓</span>
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">✓</span>
                   )}
                   {isCloseFriend(friend) && (
-                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-green-500 text-[10px] text-white">★</span>
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-green-500 text-[10px] text-white">★</span>
                   )}
                 </div>
                 {friend.username && <p className="truncate text-xs text-muted-foreground">@{friend.username}</p>}
@@ -85,7 +85,7 @@ export function FriendList({ friends, isLoading, onRemove, onToggleFavorite, onT
                 )}
               </div>
             </div>
-            <div className="flex gap-1">
+            <div className="flex shrink-0 gap-1">
               {showFavoriteButton && onToggleFavorite && "is_favorite" in friend && (
                 <Button
                   variant="ghost"

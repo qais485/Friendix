@@ -208,20 +208,20 @@ export function MessageInput({ onSendMessage, replyTo, onClearReply, conversatio
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="mb-2 relative inline-block"
+            className="mb-2 relative inline-block max-w-full"
           >
             {pendingFile.preview ? (
               <OptimizedImage
                 src={pendingFile.preview}
                 alt="Preview"
                 preset="full"
-                className="h-24 rounded-lg object-cover"
+                className="h-24 max-w-full rounded-lg object-cover"
               />
             ) : (
               <div className="flex items-center gap-2 rounded-lg bg-muted px-3 py-2">
-                <FileIcon className="h-8 w-8 text-muted-foreground" />
-                <div>
-                  <p className="text-xs font-medium truncate max-w-[200px]">{pendingFile.file.name}</p>
+                <FileIcon className="h-8 w-8 shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
+                  <p className="max-w-[160px] truncate text-xs font-medium sm:max-w-[200px]">{pendingFile.file.name}</p>
                   <p className="text-xs text-muted-foreground">
                     {(pendingFile.file.size / 1024).toFixed(1)} KB
                   </p>
@@ -268,7 +268,7 @@ export function MessageInput({ onSendMessage, replyTo, onClearReply, conversatio
         </motion.div>
       )}
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-1.5 sm:gap-2">
         <input
           ref={imageInputRef}
           type="file"
@@ -284,24 +284,24 @@ export function MessageInput({ onSendMessage, replyTo, onClearReply, conversatio
         />
 
         {!isRecording && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-0.5 sm:gap-1">
             <button
               onClick={() => imageInputRef.current?.click()}
-              className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground sm:p-2"
               aria-label="Send image"
             >
               <Image className="h-5 w-5" />
             </button>
             <button
               onClick={() => fileInputRef.current?.click()}
-              className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground sm:p-2"
               aria-label="Attach file"
             >
               <Paperclip className="h-5 w-5" />
             </button>
             <button
               onClick={() => setShowEmoji(!showEmoji)}
-              className="rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground sm:p-2"
               aria-label="Add emoji"
               aria-expanded={showEmoji}
             >

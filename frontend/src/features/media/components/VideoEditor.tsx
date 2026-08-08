@@ -147,8 +147,8 @@ export function VideoEditor({ videoUrl, onSave, onCancel }: VideoEditorProps) {
         </Button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-1 items-center justify-center p-4">
+      <div className="flex flex-1 flex-col overflow-hidden md:flex-row">
+        <div className="flex min-h-0 flex-1 items-center justify-center p-4">
           <video
             ref={videoRef}
             src={videoUrl}
@@ -160,7 +160,7 @@ export function VideoEditor({ videoUrl, onSave, onCancel }: VideoEditorProps) {
           />
         </div>
 
-        <div className="w-72 border-l bg-background p-4">
+        <div className="w-full overflow-y-auto border-t bg-background p-4 md:w-72 md:border-l md:border-t-0">
           <h3 className="mb-4 text-sm font-medium">Tools</h3>
 
           <div className="space-y-1">

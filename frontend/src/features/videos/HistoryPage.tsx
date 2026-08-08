@@ -23,7 +23,7 @@ export function HistoryPage() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          <div className="flex items-center justify-between pt-12 md:pt-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-12 md:pt-0">
             <div className="flex items-center gap-3">
               <Link
                 to="/videos"
@@ -86,7 +86,7 @@ export function HistoryPage() {
                   {item.video && (
                     <>
                       <VideoCard video={item.video} index={i} />
-                      <div className="mt-3 flex items-center gap-3 text-xs text-muted-foreground">
+                      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                         {item.completed ? (
                           <span className="flex items-center gap-1 text-green-500 font-medium">
                             <CheckCircle className="h-3 w-3" /> Completed

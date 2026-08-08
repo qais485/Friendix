@@ -27,7 +27,9 @@ def compute_quality(
 
     parts = {
         "title": 1.0 if title and len(title) >= cfg.QUALITY_TITLE_MIN_LENGTH else (0.3 if title else 0.0),
-        "media": 1.0 if media_type and media_type not in ("text",) else 0.2,
+        # Softened: plain-text posts are only slightly penalized so media-heavy
+        # content cannot dominate the quality signal on metadata alone.
+        "media": 1.0 if media_type and media_type not in ("text",) else 0.5,
         "category": 1.0 if category_name else 0.0,
         "tags": min(len(tags) / cfg.QUALITY_TAGS_TARGET, 1.0),
         "topics": min(len(topics) / cfg.QUALITY_TOPICS_TARGET, 1.0),

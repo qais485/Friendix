@@ -28,7 +28,7 @@ export function CommentReactions({ commentId, reactions, hasReacted }: CommentRe
   }, {} as Record<string, { emoji: string; count: number; hasReacted: boolean }>);
 
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="flex flex-wrap items-center gap-1.5">
       <div className="relative">
         <button
           onClick={() => setShowPicker(!showPicker)}
@@ -41,7 +41,7 @@ export function CommentReactions({ commentId, reactions, hasReacted }: CommentRe
         </button>
 
         {showPicker && (
-          <div className="absolute bottom-full left-0 z-10 mb-2 flex gap-1 rounded-2xl glass-card p-1.5">
+          <div className="absolute bottom-full left-0 z-10 mb-2 flex max-w-[calc(100vw-2rem)] flex-wrap gap-1 rounded-2xl glass-card p-1.5">
             {EMOJI_OPTIONS.map((emoji) => (
               <button
                 key={emoji}

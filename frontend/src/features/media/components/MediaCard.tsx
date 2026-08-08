@@ -188,7 +188,7 @@ export function MediaCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-8 w-8 p-0 transition-opacity sm:opacity-0 sm:group-hover:opacity-100"
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowMenu(!showMenu);
@@ -203,7 +203,7 @@ export function MediaCard({
                     className="fixed inset-0 z-10"
                     onClick={() => setShowMenu(false)}
                   />
-                  <div className="absolute right-0 top-full z-20 mt-1 w-40 overflow-hidden rounded-lg border bg-background shadow-lg">
+                  <div className="absolute right-0 top-full z-20 mt-1 w-40 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg border bg-background shadow-lg">
                     <button
                       onClick={() => {
                         onClick?.(media);

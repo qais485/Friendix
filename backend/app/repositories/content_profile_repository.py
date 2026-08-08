@@ -1,7 +1,7 @@
 import json
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
@@ -82,6 +82,41 @@ class ContentProfileRepository:
         ).scalars().all()
         return list(rows)
 
+    def count_source_rows(self, content_type: str) -> int:
+        model, _ = _SOURCE_MODELS[content_type]
+        return self.db.execute(select(func.count(model.id))).scalar() or 0
+
+    def list_content_ids_paginated(self, content_type: str, offset: int, limit: int) -> list[UUID]:
+        model, _ = _SOURCE_MODELS[content_type]
+        rows = self.db.execute(
+            select(model.id)
+            .order_by(model.created_at.desc(), model.id.desc())
+            .offset(offset)
+            .limit(limit)
+        ).scalars().all()
+        return list(rows)
+
+    def prune_stale(self, content_type: str, batch_size: int = 500) -> int:
+        """Delete profiles whose source content row no longer exists."""
+        model, _ = _SOURCE_MODELS[content_type]
+        profile_ids = self.db.execute(
+            select(ContentProfile.content_id).where(ContentProfile.content_type == content_type)
+        ).scalars().all()
+        removed = 0
+        for i in range(0, len(profile_ids), batch_size):
+            chunk = profile_ids[i:i + batch_size]
+            existing = set(self.db.execute(select(model.id).where(model.id.in_(chunk))).scalars().all())
+            missing = [cid for cid in chunk if cid not in existing]
+            if missing:
+                self.db.execute(
+                    delete(ContentProfile).where(
+                        ContentProfile.content_type == content_type,
+                        ContentProfile.content_id.in_(missing),
+                    )
+                )
+                removed += len(missing)
+        return removed
+
     # ── persistence ───────────────────────────────────────
 
     def upsert_profiles(self, profiles: list[dict]) -> int:
@@ -143,3 +178,11 @@ class ContentProfileRepository:
                 setattr(profile, key, value)
         profile.version = (profile.version or 1) + 1
         return profile
+
+    def delete_content_profile(self, content_type: str, content_id: UUID) -> None:
+        self.db.execute(
+            delete(ContentProfile).where(
+                ContentProfile.content_type == content_type,
+                ContentProfile.content_id == content_id,
+            )
+        )

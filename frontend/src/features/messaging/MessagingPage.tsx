@@ -45,7 +45,7 @@ export function MessagingPage() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-background pt-14">
       <AnimatePresence mode="wait">
         {isMobile ? (
           <motion.div

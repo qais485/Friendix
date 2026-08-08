@@ -48,7 +48,7 @@ export function NewChatModal({ onClose, onSelect }: NewChatModalProps) {
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="w-full max-w-md rounded-3xl glass-card shadow-float"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl glass-card shadow-float"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b px-4 py-3">

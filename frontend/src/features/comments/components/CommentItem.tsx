@@ -114,7 +114,7 @@ export function CommentItem({ comment, currentUserId, postOwnerId, postId, onRep
   }
 
   return (
-    <div className={cn("py-2.5", isReply && "ml-8")}>
+    <div className={cn("py-2.5", isReply && "ml-5 sm:ml-8")}>
       <div className="flex items-start gap-2.5">
         <div className="flex-shrink-0">
           {comment.author?.avatar_url ? (
@@ -136,30 +136,30 @@ export function CommentItem({ comment, currentUserId, postOwnerId, postId, onRep
 
         <div className="min-w-0 flex-1">
           <div className="rounded-xl bg-muted/50 px-3 py-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="truncate text-sm font-semibold">
                   {comment.author?.full_name || comment.author?.username || "Unknown"}
                 </span>
                 {comment.author?.is_verified && (
-                  <span className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-blue-500 text-[8px] text-white">✓</span>
+                  <span className="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-blue-500 text-[8px] text-white">✓</span>
                 )}
-                <span className="text-[11px] text-muted-foreground">{formatDate(comment.created_at)}</span>
+                <span className="shrink-0 text-[11px] text-muted-foreground">{formatDate(comment.created_at)}</span>
                 {comment.is_pinned && (
-                  <span className="flex items-center gap-1 text-[11px] text-yellow-500 font-medium">
+                  <span className="flex shrink-0 items-center gap-1 text-[11px] text-yellow-500 font-medium">
                     <Pin className="h-3 w-3" /> Pinned
                   </span>
                 )}
-                {comment.is_hidden && <span className="text-[11px] text-muted-foreground">Hidden</span>}
+                {comment.is_hidden && <span className="shrink-0 text-[11px] text-muted-foreground">Hidden</span>}
               </div>
 
-              <div className="relative">
+              <div className="relative shrink-0">
                 <button onClick={() => setShowMenu(!showMenu)} className="rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted">
                   <MoreHorizontal className="h-4 w-4" />
                 </button>
 
                 {showMenu && (
-                  <div className="absolute right-0 top-full z-10 mt-1 w-44 overflow-hidden rounded-2xl glass-card p-1.5">
+                  <div className="absolute right-0 top-full z-10 mt-1 w-44 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl glass-card p-1.5">
                     {isOwner && (
                       <>
                         <button onClick={() => { setIsEditing(true); setShowMenu(false); }} className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-muted">
@@ -231,11 +231,11 @@ export function CommentItem({ comment, currentUserId, postOwnerId, postId, onRep
             {isEditing ? (
               <CommentForm postId={postId} placeholder="Edit comment..." onCancel={() => setIsEditing(false)} autoFocus />
             ) : (
-              <p className="mt-1 whitespace-pre-wrap text-sm">{comment.content}</p>
+              <p className="mt-1 whitespace-pre-wrap break-words text-sm">{comment.content}</p>
             )}
           </div>
 
-          <div className="mt-1.5 flex items-center gap-4 px-1">
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1">
             <CommentReactions commentId={comment.id} reactions={comment.reactions} hasReacted={comment.has_reacted} />
 
             {!isReply && (

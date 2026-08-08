@@ -47,6 +47,12 @@ class ContentProfileRefreshResponse(BaseModel):
     built: int
 
 
+class ContentProfileBackfillResponse(BaseModel):
+    built: int
+    pruned: int
+    per_type: dict[str, dict[str, int]]
+
+
 class ContentMetricsRefreshResponse(BaseModel):
     processed_events: int
     profiles_updated: int

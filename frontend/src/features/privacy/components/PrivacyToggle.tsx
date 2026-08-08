@@ -16,18 +16,20 @@ export function PrivacyToggle({
   disabled,
 }: PrivacyToggleProps) {
   return (
-    <div className="flex items-center justify-between">
-      <div className="space-y-0.5">
-        <p className="font-medium">{label}</p>
+    <div className="flex items-center justify-between gap-4">
+      <div className="min-w-0 flex-1 space-y-0.5">
+        <p className="font-medium break-words">{label}</p>
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-sm text-muted-foreground break-words">{description}</p>
         )}
       </div>
-      <Switch
-        checked={checked}
-        onCheckedChange={onCheckedChange}
-        disabled={disabled}
-      />
+      <span className="shrink-0">
+        <Switch
+          checked={checked}
+          onCheckedChange={onCheckedChange}
+          disabled={disabled}
+        />
+      </span>
     </div>
   );
 }

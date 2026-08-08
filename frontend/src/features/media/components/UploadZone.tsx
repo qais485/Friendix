@@ -112,7 +112,7 @@ export function UploadZone({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "relative rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200",
+        "relative rounded-xl border-2 border-dashed p-6 text-center transition-all duration-200 sm:p-8",
         isDragOver
           ? "border-primary bg-primary/5 scale-[1.02]"
           : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50",

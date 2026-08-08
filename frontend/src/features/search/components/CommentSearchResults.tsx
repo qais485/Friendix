@@ -25,16 +25,16 @@ export function CommentSearchResults({ comments }: CommentSearchResultsProps) {
           >
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MessageCircle className="h-4 w-4 shrink-0" />
-              <span className="font-medium text-foreground">
+              <span className="min-w-0 truncate font-medium text-foreground">
                 @{comment.username}
               </span>
-              <span>commented</span>
-              <span className="ml-auto text-xs">
+              <span className="shrink-0">commented</span>
+              <span className="ml-auto shrink-0 whitespace-nowrap text-xs">
                 {formatDistanceToNow(new Date(comment.created_at))}
               </span>
             </div>
             {comment.content && (
-              <p className="mt-2 text-sm line-clamp-3 whitespace-pre-wrap">
+              <p className="mt-2 line-clamp-3 break-words whitespace-pre-wrap text-sm">
                 {comment.content}
               </p>
             )}

@@ -40,7 +40,7 @@ export function LiveChat({ streamId, allowChat }: LiveChatProps) {
   };
 
   return (
-    <div className="flex h-[400px] flex-col overflow-hidden rounded-2xl glass-card">
+    <div className="flex h-[320px] flex-col overflow-hidden rounded-2xl glass-card sm:h-[400px]">
       <div className="border-b px-4 py-3">
         <h3 className="font-bold">Live Chat</h3>
       </div>
@@ -64,8 +64,8 @@ export function LiveChat({ streamId, allowChat }: LiveChatProps) {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline gap-2">
-                <span className="text-sm font-semibold">{msg.user?.display_name || msg.user?.username || "Anonymous"}</span>
-                <span className="text-[10px] text-muted-foreground">
+                <span className="min-w-0 truncate text-sm font-semibold">{msg.user?.display_name || msg.user?.username || "Anonymous"}</span>
+                <span className="shrink-0 text-[10px] text-muted-foreground">
                   {new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </span>
               </div>

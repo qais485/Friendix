@@ -19,7 +19,7 @@ export function ToastContainer() {
           key={toast.id}
           role="alert"
           className={cn(
-            "flex w-80 items-start gap-3 rounded-2xl glass-card p-4 animate-in slide-in-from-right",
+            "flex w-full max-w-80 items-start gap-3 rounded-2xl glass-card p-4 animate-in slide-in-from-right",
             toast.variant === "destructive" && "border-destructive/50 bg-destructive/10"
           )}
         >

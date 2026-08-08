@@ -2,7 +2,26 @@ from uuid import UUID
 from sqlalchemy import func, insert, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
-from app.models import ContentEvent, ViewSession
+from app.models import (
+    ContentEvent,
+    LiveStream,
+    Media,
+    Post,
+    Reel,
+    Story,
+    Video,
+    ViewSession,
+)
+
+# Tracking content types -> source model used for existence + owner checks.
+_CONTENT_MODELS = {
+    "video": Video,
+    "post": Post,
+    "reel": Reel,
+    "story": Story,
+    "live": LiveStream,
+    "media": Media,
+}
 
 
 class EventTrackingRepository:
@@ -33,6 +52,22 @@ class EventTrackingRepository:
         if not rows:
             return
         self.db.execute(insert(ContentEvent), rows)
+
+    def get_existing_owners(
+        self, content_type: str, content_ids: list[UUID]
+    ) -> dict[UUID, UUID | None]:
+        """Return ``{content_id: owner_user_id}`` for existing content rows.
+
+        Used to drop events referencing content that no longer exists and to
+        correct spoofed ``creator_id`` values.
+        """
+        model = _CONTENT_MODELS.get(content_type)
+        if model is None or not content_ids:
+            return {}
+        rows = self.db.execute(
+            select(model.id, model.user_id).where(model.id.in_(content_ids))
+        ).all()
+        return {r[0]: r[1] for r in rows}
 
     def upsert_view_session(self, payload: dict) -> None:
         """Upsert one view session, accumulating counters in place."""

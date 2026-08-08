@@ -105,7 +105,7 @@ function LinkDialog({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="absolute bottom-full left-0 z-30 mb-2 w-80 rounded-2xl glass-card p-3 shadow-lg"
+      className="absolute bottom-full right-0 z-30 mb-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl glass-card p-3 shadow-lg"
     >
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-medium">Insert Link</span>
@@ -183,7 +183,7 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm max-w-none w-full px-0 py-0 leading-relaxed focus:outline-none",
+          "prose prose-sm max-w-none w-full break-words px-0 py-0 leading-relaxed focus:outline-none",
           backgroundMode
             ? "min-h-[120px] text-center text-2xl font-bold text-white drop-shadow-lg [&_.is-editor-empty:first-child::before]:text-white/50"
             : "min-h-[72px] text-sm [&_.is-editor-empty:first-child::before]:text-muted-foreground",

@@ -12,6 +12,7 @@ import {
   useVideoDetail, useToggleVideoLike, useToggleWatchLater,
   useRecordWatch, useRecommendations, useAddVideoToPlaylist, useUserPlaylists,
 } from "./hooks";
+import { tracking } from "@/services/tracking";
 import { useState } from "react";
 
 function formatViews(count: number): string {
@@ -98,7 +99,7 @@ export function WatchPage() {
               />
 
               <div>
-                <h1 className="text-xl font-bold">{video.title}</h1>
+                <h1 className="break-words text-xl font-bold">{video.title}</h1>
                 <div className="mt-2.5 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Eye className="h-4 w-4" />
@@ -119,7 +120,10 @@ export function WatchPage() {
                   variant={video.is_liked ? "default" : "outline"}
                   size="sm"
                   className="rounded-xl gap-1.5 transition-all duration-200 hover:shadow-card"
-                  onClick={() => likeMutation.mutate(videoId)}
+                  onClick={() => {
+                    tracking.like({ content_type: "video", content_id: videoId, creator_id: video.user_id, context: "watch" });
+                    likeMutation.mutate(videoId);
+                  }}
                   disabled={likeMutation.isPending}
                 >
                   <ThumbsUp className="h-4 w-4" />
@@ -129,7 +133,10 @@ export function WatchPage() {
                   variant={video.is_watch_later ? "default" : "outline"}
                   size="sm"
                   className="rounded-xl gap-1.5 transition-all duration-200 hover:shadow-card"
-                  onClick={() => watchLaterMutation.mutate(videoId)}
+                  onClick={() => {
+                    tracking.save({ content_type: "video", content_id: videoId, creator_id: video.user_id, context: "watch" });
+                    watchLaterMutation.mutate(videoId);
+                  }}
                   disabled={watchLaterMutation.isPending}
                 >
                   <Clock className="h-4 w-4" />
@@ -146,7 +153,7 @@ export function WatchPage() {
                     Save to Playlist
                   </Button>
                   {showPlaylistMenu && playlistsData?.playlists && (
-                    <div className="absolute left-0 top-full z-10 mt-1.5 w-56 rounded-2xl glass-card p-1.5">
+                    <div className="absolute left-0 top-full z-10 mt-1.5 w-56 max-w-[calc(100vw-2rem)] rounded-2xl glass-card p-1.5">
                       {playlistsData.playlists.length === 0 ? (
                         <p className="px-3 py-2 text-xs text-muted-foreground">No playlists yet</p>
                       ) : (
@@ -172,7 +179,7 @@ export function WatchPage() {
               {/* Description */}
               {video.description && (
                 <div className="rounded-2xl glass-card p-4">
-                  <p className="whitespace-pre-wrap text-sm">{video.description}</p>
+                  <p className="whitespace-pre-wrap break-words text-sm">{video.description}</p>
                 </div>
               )}
 

@@ -142,7 +142,7 @@ export function NotificationItem({ notification, onDismiss }: NotificationItemPr
       initial={{ opacity: 0, x: -8 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className={`relative flex items-start gap-3 px-4 py-3 transition-all duration-200 hover:bg-accent/50 cursor-pointer ${
+      className={`group relative flex items-start gap-3 px-4 py-3 transition-all duration-200 hover:bg-accent/50 cursor-pointer ${
         !notification.is_read ? "bg-primary/5" : ""
       }`}
       onClick={handleClick}
@@ -201,7 +201,7 @@ export function NotificationItem({ notification, onDismiss }: NotificationItemPr
       {notification.type !== "friend_request" && (
         <button
           onClick={handleDelete}
-          className="shrink-0 rounded-xl p-1.5 text-muted-foreground/30 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100"
+          className="shrink-0 rounded-xl p-1.5 text-muted-foreground/30 hover:bg-destructive/10 hover:text-destructive transition-all duration-200 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 sm:focus:opacity-100"
         >
           <X className="h-3.5 w-3.5" />
         </button>

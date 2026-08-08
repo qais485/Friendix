@@ -212,7 +212,7 @@ export function FriendsPage() {
 
           {activeTab === "close" && (
             <div className="space-y-4">
-              <div className="rounded-2xl glass-card p-6">
+              <div className="rounded-2xl glass-card p-4 sm:p-6">
                 <h3 className="text-lg font-bold">Close Friends</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   These friends can see your close-friends-only stories and content.

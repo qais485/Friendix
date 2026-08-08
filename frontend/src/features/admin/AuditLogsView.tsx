@@ -61,7 +61,31 @@ export function AuditLogsView() {
           <p className="mt-2 text-sm text-muted-foreground">No audit logs found.</p>
         </Card>
       ) : (
-        <Card>
+        <>
+          <div className="space-y-3 md:hidden">
+            {logs.map((log) => (
+              <Card key={log.id}>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="min-w-0 truncate text-sm font-medium">{log.admin_name || "—"}</p>
+                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">{log.action}</span>
+                  </div>
+                  <p className="break-words text-sm text-muted-foreground">
+                    {log.details_json || "—"}
+                  </p>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span>Entity: {log.entity_type}</span>
+                    <span>Target: {log.target_user_name || "—"}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(log.created_at))}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="hidden md:block">
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -94,7 +118,8 @@ export function AuditLogsView() {
               </tbody>
             </table>
           </CardContent>
-        </Card>
+          </Card>
+        </>
       )}
 
       {hasMore && (

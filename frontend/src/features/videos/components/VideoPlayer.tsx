@@ -3,6 +3,7 @@ import { Play, Pause, Volume2, VolumeX, Maximize, SkipBack, SkipForward } from "
 import { cn } from "@/lib/utils";
 import { getVideoPosterUrl } from "@/lib/cloudinaryTransform";
 import { Button } from "@/components/ui/button";
+import { tracking } from "@/services/tracking";
 import type { Video } from "@/types/videos";
 
 interface VideoPlayerProps {
@@ -34,16 +35,53 @@ export function VideoPlayer({ video, onProgress, onEnded, autoPlay = false }: Vi
   useEffect(() => {
     const el = videoRef.current;
     if (!el) return;
+    let viewStarted = false;
+    let lastWatchSeconds = 0;
     const onTimeUpdate = () => {
       setCurrentTime(el.currentTime);
       if (onProgress && el.duration) {
         onProgress(el.currentTime / el.duration);
       }
+      if (viewStarted && el.currentTime - lastWatchSeconds >= 10) {
+        lastWatchSeconds = el.currentTime;
+        tracking.watchTime({
+          content_type: "video",
+          content_id: video.id,
+          creator_id: video.user_id,
+          value: Math.round(el.currentTime),
+          position_seconds: Math.round(el.currentTime),
+          context: "watch",
+        });
+      }
     };
     const onLoadedMetadata = () => setDuration(el.duration);
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      setIsPlaying(true);
+      if (!viewStarted) {
+        viewStarted = true;
+        tracking.viewStart({
+          content_type: "video",
+          content_id: video.id,
+          creator_id: video.user_id,
+          context: "watch",
+        });
+      }
+    };
     const onPause = () => setIsPlaying(false);
-    const onEndedHandler = () => { setIsPlaying(false); onEnded?.(); };
+    const onEndedHandler = () => {
+      setIsPlaying(false);
+      if (viewStarted) {
+        tracking.completion({
+          content_type: "video",
+          content_id: video.id,
+          creator_id: video.user_id,
+          value: 100,
+          position_seconds: Math.round(el.duration),
+          context: "watch",
+        });
+      }
+      onEnded?.();
+    };
     el.addEventListener("timeupdate", onTimeUpdate);
     el.addEventListener("loadedmetadata", onLoadedMetadata);
     el.addEventListener("play", onPlay);
@@ -56,7 +94,7 @@ export function VideoPlayer({ video, onProgress, onEnded, autoPlay = false }: Vi
       el.removeEventListener("pause", onPause);
       el.removeEventListener("ended", onEndedHandler);
     };
-  }, [onProgress, onEnded]);
+  }, [onProgress, onEnded, video.id, video.user_id]);
 
   const togglePlay = () => {
     const el = videoRef.current;
@@ -151,25 +189,25 @@ export function VideoPlayer({ video, onProgress, onEnded, autoPlay = false }: Vi
           />
         </div>
 
-        <div className="flex items-center justify-between text-white">
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={togglePlay}>
+          <div className="flex items-center justify-between text-white">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-white hover:bg-white/20" onClick={togglePlay}>
               {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-white" />}
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={() => skip(-10)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-white hover:bg-white/20" onClick={() => skip(-10)}>
               <SkipBack className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={() => skip(10)}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-white hover:bg-white/20" onClick={() => skip(10)}>
               <SkipForward className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={toggleMute}>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-white hover:bg-white/20" onClick={toggleMute}>
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </Button>
-            <span className="text-xs text-white/80">
+            <span className="shrink-0 text-xs text-white/80">
               {formatTime(currentTime)} / {formatTime(duration)}
             </span>
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-white hover:bg-white/20" onClick={toggleFullscreen}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-white hover:bg-white/20" onClick={toggleFullscreen}>
             <Maximize className="h-4 w-4" />
           </Button>
         </div>

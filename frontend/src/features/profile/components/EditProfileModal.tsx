@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Loader2, Check } from "lucide-react";
+import { X, Loader2, Check, AtSign, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { isValidUsername, USERNAME_MAX_LENGTH } from "@/lib/username";
+import { profileApi } from "@/services/profileApi";
 import type { Profile, ProfileUpdate } from "@/types";
 
 interface EditProfileModalProps {
@@ -46,6 +48,11 @@ export function EditProfileModal({ profile, isOpen, onClose, onSave }: EditProfi
     profile_theme: profile.profile_theme || "default",
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [username, setUsername] = useState(profile.username || "");
+  const [usernameError, setUsernameError] = useState<string | null>(null);
+  const [usernameChecking, setUsernameChecking] = useState(false);
+  const [usernameAvailable, setUsernameAvailable] = useState(false);
+  const usernameCheckRef = useRef<AbortController | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -64,7 +71,62 @@ export function EditProfileModal({ profile, isOpen, onClose, onSave }: EditProfi
       interests: profile.interests || "",
       profile_theme: profile.profile_theme || "default",
     });
+    setUsername(profile.username || "");
+    setUsernameError(null);
+    setUsernameChecking(false);
+    setUsernameAvailable(false);
   }, [profile]);
+
+  useEffect(() => {
+    usernameCheckRef.current?.abort();
+
+    if (!username || username === profile.username || username.length < 3) {
+      setUsernameError(null);
+      setUsernameChecking(false);
+      setUsernameAvailable(false);
+      return;
+    }
+
+    if (!isValidUsername(username)) {
+      setUsernameError("Only letters, numbers, underscores, and periods allowed");
+      setUsernameChecking(false);
+      setUsernameAvailable(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    usernameCheckRef.current = controller;
+    setUsernameChecking(true);
+    setUsernameAvailable(false);
+
+    const timeoutId = setTimeout(async () => {
+      try {
+        const { data } = await profileApi.checkUsername(
+          { username },
+          controller.signal
+        );
+        if (!controller.signal.aborted) {
+          setUsernameError(data.available ? null : "Username is already taken");
+          setUsernameAvailable(data.available);
+        }
+      } catch (err) {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        if (!controller.signal.aborted) {
+          setUsernameError("Failed to check username");
+          setUsernameAvailable(false);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setUsernameChecking(false);
+        }
+      }
+    }, 500);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
+  }, [username, profile.username]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") {
@@ -108,8 +170,9 @@ export function EditProfileModal({ profile, isOpen, onClose, onSave }: EditProfi
   }, [isOpen, handleKeyDown]);
 
   const handleSave = async () => {
+    if (!username || usernameError || usernameChecking) return;
     setIsSaving(true);
-    try { await onSave(formData); onClose(); } finally { setIsSaving(false); }
+    try { await onSave({ ...formData, username }); onClose(); } finally { setIsSaving(false); }
   };
 
   if (!isOpen) return null;
@@ -131,7 +194,7 @@ export function EditProfileModal({ profile, isOpen, onClose, onSave }: EditProfi
           role="dialog"
           aria-modal="true"
           aria-labelledby="edit-profile-title"
-          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl glass-card p-6 shadow-float"
+          className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl glass-card p-4 shadow-float sm:p-6"
           onClick={(e) => e.stopPropagation()}
         >
           <div className="mb-6 flex items-center justify-between">
@@ -142,6 +205,39 @@ export function EditProfileModal({ profile, isOpen, onClose, onSave }: EditProfi
           </div>
 
           <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="username">Username</Label>
+              <div className="relative">
+                <AtSign className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  id="username"
+                  value={username}
+                  onChange={(e) => {
+                    setUsername(e.target.value.toLowerCase());
+                    setUsernameError(null);
+                  }}
+                  className="pl-9"
+                  placeholder="username"
+                  maxLength={USERNAME_MAX_LENGTH}
+                />
+              </div>
+              {usernameChecking && (
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Checking availability...
+                </p>
+              )}
+              {!usernameChecking && usernameError && (
+                <p className="text-xs text-destructive">{usernameError}</p>
+              )}
+              {!usernameChecking && !usernameError && username && username !== profile.username && usernameAvailable && (
+                <p className="flex items-center gap-1 text-xs text-green-600">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Username is available!
+                </p>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="full_name">Full Name</Label>
               <Input
@@ -259,9 +355,9 @@ export function EditProfileModal({ profile, isOpen, onClose, onSave }: EditProfi
             </div>
           </div>
 
-          <div className="mt-6 flex justify-end gap-3">
+          <div className="mt-6 flex flex-wrap justify-end gap-3">
             <Button variant="outline" className="rounded-full" onClick={onClose}>Cancel</Button>
-            <Button className="rounded-full" onClick={handleSave} disabled={isSaving}>
+            <Button className="rounded-full" onClick={handleSave} disabled={isSaving || !!usernameError || usernameChecking}>
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
               Save Changes
             </Button>

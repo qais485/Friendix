@@ -56,12 +56,12 @@ export function PlaylistDetailPage() {
 
           <div className="rounded-2xl glass-card p-6">
             <div className="flex items-start gap-4">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 shadow-card">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 shadow-card">
                 <ListVideo className="h-8 w-8 text-primary" />
               </div>
               <div className="flex-1">
-                <h1 className="text-2xl font-bold">{playlist.name}</h1>
-                <div className="mt-1.5 flex items-center gap-3 text-sm text-muted-foreground">
+                <h1 className="break-words text-2xl font-bold">{playlist.name}</h1>
+                <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
                   <span>{playlist.videos_count} videos</span>
                   <span className="flex items-center gap-1">
                     {playlist.privacy === "only_me" ? (

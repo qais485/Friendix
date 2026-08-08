@@ -16,7 +16,7 @@ export function ErrorState({
   className,
 }: ErrorStateProps) {
   return (
-    <div className={cn("flex flex-col items-center justify-center rounded-3xl glass-card border border-dashed py-20 text-center px-6", className)}>
+    <div className={cn("flex flex-col items-center justify-center rounded-3xl glass-card border border-dashed py-12 sm:py-20 text-center px-6", className)}>
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10 backdrop-blur-sm">
         <AlertTriangle className="h-8 w-8 text-destructive/70" />
       </div>
@@ -54,7 +54,7 @@ export function ErrorBanner({
       )}
     >
       <AlertTriangle className="h-4 w-4 shrink-0 text-destructive" />
-      <p className="flex-1 text-destructive">{message}</p>
+      <p className="min-w-0 flex-1 break-words text-destructive">{message}</p>
       {onRetry && (
         <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={onRetry}>
           Retry

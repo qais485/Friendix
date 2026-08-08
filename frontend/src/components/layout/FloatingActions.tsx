@@ -37,7 +37,7 @@ export function FloatingActions() {
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
             onSubmit={handleSearchSubmit}
-            className="overflow-hidden"
+            className="overflow-hidden max-w-[calc(100vw-10rem)]"
           >
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />

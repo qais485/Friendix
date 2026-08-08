@@ -51,7 +51,7 @@ export function RightSidebar() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="rounded-full text-xs"
+                  className="shrink-0 rounded-full text-xs"
                   onClick={() => {
                     sendRequest.mutate(suggestion.id, {
                       onSuccess: () => toast({ title: "Friend request sent" }),

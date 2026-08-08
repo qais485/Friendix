@@ -42,7 +42,7 @@ export function UserSearch({
             className="pl-9"
           />
         </div>
-        <Button onClick={handleSearch} disabled={!query.trim() || searchUsers.isPending}>
+        <Button onClick={handleSearch} disabled={!query.trim() || searchUsers.isPending} className="shrink-0">
           {searchUsers.isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
@@ -74,19 +74,19 @@ export function UserSearch({
                   height={32}
                   loading="lazy"
                   decoding="async"
-                  className="h-8 w-8 rounded-full object-cover"
+                  className="h-8 w-8 shrink-0 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted">
                   <span className="text-xs font-medium text-muted-foreground">
                     {(user.full_name || user.username || "U")[0].toUpperCase()}
                   </span>
                 </div>
               )}
-              <div>
-                <p className="font-medium">{user.full_name || "User"}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-medium">{user.full_name || "User"}</p>
                 {user.username && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="truncate text-xs text-muted-foreground">
                     @{user.username}
                   </p>
                 )}

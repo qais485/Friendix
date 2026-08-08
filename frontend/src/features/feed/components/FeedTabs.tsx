@@ -10,7 +10,7 @@ interface FeedTabsProps {
 
 export function FeedTabs({ activeTab, onTabChange }: FeedTabsProps) {
   return (
-    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+    <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
       {FEED_TABS.map((tab) => (
         <Button
           key={tab.key}

@@ -37,21 +37,21 @@ class InterestRepository:
     # ── Profile watermark ──────────────────────────────────
 
     def get_or_create_profile(self, user_id: UUID) -> InterestProfile:
-        profile = self.db.execute(
+        stmt = pg_insert(InterestProfile).values(
+            user_id=user_id,
+            computed_at=datetime.now(timezone.utc),
+            total_interests=0,
+            version=1,
+        ).on_conflict_do_nothing(
+            index_elements=[InterestProfile.user_id]
+        )
+        self.db.execute(stmt)
+        self.db.flush()
+        return self.db.execute(
             select(InterestProfile)
             .where(InterestProfile.user_id == user_id)
             .with_for_update()
-        ).scalar_one_or_none()
-        if profile is None:
-            profile = InterestProfile(
-                user_id=user_id,
-                computed_at=datetime.now(timezone.utc),
-                total_interests=0,
-                version=1,
-            )
-            self.db.add(profile)
-            self.db.flush()
-        return profile
+        ).scalar_one()
 
     def get_profile_row(self, user_id: UUID) -> InterestProfile | None:
         return self.db.execute(
@@ -149,6 +149,7 @@ class InterestRepository:
                         total_signals=u["total_signals"],
                         first_seen_at=occurred,
                         last_interaction_at=occurred,
+                        last_decayed_at=occurred,
                     )
                 )
                 continue
@@ -163,6 +164,7 @@ class InterestRepository:
             row.entity_id = u.get("entity_id") or row.entity_id
             if occurred > row.last_interaction_at:
                 row.last_interaction_at = occurred
+                row.last_decayed_at = occurred
 
         if created:
             self.db.add_all(created)

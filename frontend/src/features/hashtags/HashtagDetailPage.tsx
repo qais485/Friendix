@@ -76,20 +76,20 @@ export function HashtagDetailPage() {
               Hashtags
             </Link>
 
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 flex-wrap">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary/10 shadow-card transition-all duration-200">
                 <Hash className="h-7 w-7 text-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <h1 className="text-2xl font-bold tracking-tight">
+                <h1 className="text-2xl font-bold tracking-tight break-words">
                   #{hashtag.name}
                 </h1>
                 {hashtag.description && (
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="mt-1 text-sm text-muted-foreground break-words">
                     {hashtag.description}
                   </p>
                 )}
-                <div className="mt-2 flex items-center gap-4 text-sm text-muted-foreground">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1 transition-all duration-200 hover:text-foreground">
                     <FileText className="h-4 w-4" />
                     {hashtag.posts_count} {hashtag.posts_count === 1 ? "post" : "posts"}

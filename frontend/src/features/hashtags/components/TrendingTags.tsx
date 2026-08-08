@@ -56,7 +56,9 @@ export function TrendingTags() {
                 </p>
               </div>
             </Link>
-            <FollowButton hashtagName={tag.name} isFollowing={tag.is_following} size="sm" />
+            <span className="shrink-0">
+              <FollowButton hashtagName={tag.name} isFollowing={tag.is_following} size="sm" />
+            </span>
           </div>
         </motion.div>
       ))}

@@ -34,7 +34,7 @@ export function PlaylistsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          <div className="flex items-center justify-between pt-12 md:pt-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-12 md:pt-0">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 shadow-card">
                 <ListVideo className="h-5 w-5 text-primary" />
@@ -65,7 +65,7 @@ export function PlaylistsPage() {
                 className="w-full rounded-xl border bg-background px-4 py-2.5 text-sm outline-none placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 transition-all duration-200"
                 autoFocus
               />
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <select
                   value={privacy}
                   onChange={(e) => setPrivacy(e.target.value as typeof privacy)}

@@ -23,7 +23,7 @@ export function ConversationSearch({ conversationId, onSelectMessage, onClose }:
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           autoFocus
-          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />
         <button
           onClick={onClose}

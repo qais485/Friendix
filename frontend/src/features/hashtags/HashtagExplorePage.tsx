@@ -36,10 +36,10 @@ export function HashtagExplorePage() {
           className="space-y-5"
         >
           <div className="flex items-center gap-3 pt-12 md:pt-0">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 shadow-card transition-all duration-200">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 shadow-card transition-all duration-200">
               <Hash className="h-5 w-5 text-primary" />
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <h1 className="text-2xl font-bold tracking-tight">Hashtags</h1>
               <p className="text-sm text-muted-foreground">
                 Discover trending topics and follow what matters to you
@@ -79,7 +79,7 @@ export function HashtagExplorePage() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="rounded-2xl glass-card p-8 text-center transition-all duration-200"
+                className="rounded-2xl glass-card p-6 sm:p-8 text-center transition-all duration-200"
               >
                 <Search className="mx-auto h-12 w-12 text-muted-foreground/40" />
                 <p className="mt-4 text-muted-foreground">
@@ -129,7 +129,7 @@ export function HashtagExplorePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="rounded-2xl glass-card p-8 text-center transition-all duration-200">
+                    <div className="rounded-2xl glass-card p-6 sm:p-8 text-center transition-all duration-200">
                       <Sparkles className="mx-auto h-10 w-10 text-muted-foreground/40" />
                       <p className="mt-3 text-sm text-muted-foreground">
                         No trending hashtags yet. Be the first to create one!

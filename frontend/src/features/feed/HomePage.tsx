@@ -18,7 +18,7 @@ function errorMessage(err: unknown): string {
   return e.response?.data?.detail ?? e.message ?? "Something went wrong";
 }
 import {
-  useHomeFeed,
+  useForYouFeed,
   useFollowingFeed,
   useFriendsFeed,
   useTrendingFeed,
@@ -52,6 +52,7 @@ import {
 import { useFeedReels } from "@/features/media/hooks";
 import { ReelPlayer } from "@/features/media/components";
 import { InputDialog } from "@/components/ui/InputDialog";
+import { tracking } from "@/services/tracking";
 import type { FeedType, FeedSortBy, PostCreate, Post } from "@/types";
 
 export function HomePage() {
@@ -62,7 +63,7 @@ export function HomePage() {
   const [sortBy, setSortBy] = useState<FeedSortBy>("latest");
   const observerRef = useRef<HTMLDivElement>(null);
 
-  const homeFeed = useHomeFeed(userId || undefined);
+  const homeFeed = useForYouFeed(userId || undefined);
   const followingFeed = useFollowingFeed(userId || undefined);
   const friendsFeed = useFriendsFeed(userId || undefined);
   const trendingFeed = useTrendingFeed(userId || undefined);
@@ -141,9 +142,15 @@ export function HomePage() {
       onError: () => toast({ title: "Failed to delete post", variant: "destructive" }),
     });
   }, [deletePost, toast]);
-  const handleSavePost = useCallback(async (postId: string) => { await savePost.mutateAsync(postId); }, [savePost]);
+  const handleSavePost = useCallback(async (postId: string) => {
+    tracking.save({ content_type: "post", content_id: postId, creator_id: posts.find((p) => p.id === postId)?.user_id, context: "feed" });
+    await savePost.mutateAsync(postId);
+  }, [savePost, posts]);
   const handleUnsavePost = useCallback(async (postId: string) => { await unsavePost.mutateAsync(postId); }, [unsavePost]);
-  const handleHidePost = useCallback(async (postId: string) => { await hidePost.mutateAsync(postId); }, [hidePost]);
+  const handleHidePost = useCallback(async (postId: string) => {
+    tracking.notInterested({ content_type: "post", content_id: postId, creator_id: posts.find((p) => p.id === postId)?.user_id, context: "feed" });
+    await hidePost.mutateAsync(postId);
+  }, [hidePost, posts]);
   const handleUnhidePost = useCallback(async (postId: string) => { await unhidePost.mutateAsync(postId); }, [unhidePost]);
   const handlePinPost = useCallback(async (postId: string) => { await pinPost.mutateAsync(postId); }, [pinPost]);
   const handleUnpinPost = useCallback(async (postId: string) => { await unpinPost.mutateAsync(postId); }, [unpinPost]);
@@ -158,12 +165,13 @@ export function HomePage() {
     }
   }, [repostPost, toast]);
   const handleLikePost = useCallback(async (postId: string) => {
+    tracking.like({ content_type: "post", content_id: postId, creator_id: posts.find((p) => p.id === postId)?.user_id, context: "feed" });
     try {
       await likePost.mutateAsync(postId);
     } catch (err) {
       toast({ title: "Failed to like", description: errorMessage(err), variant: "destructive" });
     }
-  }, [likePost, toast]);
+  }, [likePost, toast, posts]);
   const handleUnlikePost = useCallback(async (postId: string) => { await unlikePost.mutateAsync(postId); }, [unlikePost]);
   const handleEditPost = useCallback(async (post: { id: string; content?: string | null }) => {
     await updatePost.mutateAsync({ postId: post.id, data: { content: post.content || "" } });
@@ -195,9 +203,10 @@ export function HomePage() {
       onError: () => toast({ title: "Failed to mute user", variant: "destructive" }),
     });
   }, [muteUser, toast, queryClient]);
-  const handleReportPost = useCallback((_postId: string) => {
+  const handleReportPost = useCallback((postId: string) => {
+    tracking.report({ content_type: "post", content_id: postId, creator_id: posts.find((p) => p.id === postId)?.user_id, context: "feed" });
     toast({ title: "Report submitted", description: "Thank you for your report." });
-  }, [toast]);
+  }, [toast, posts]);
   const handleFollowUser = useCallback((userId: string) => {
     followUser.mutate(userId, {
       onSuccess: () => {
@@ -265,14 +274,14 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="mx-auto max-w-2xl px-4 py-6 md:px-4">
+      <div className="mx-auto w-full max-w-2xl px-4 py-4 sm:py-6">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="space-y-5"
+          className="space-y-4 sm:space-y-5"
         >
-          <div className="pt-12 md:pt-0">
+          <div className="pt-14 md:pt-0">
             <h1 className="text-2xl font-black tracking-tight text-gradient">Home</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Your social hub - share posts, photos, videos, and stories.

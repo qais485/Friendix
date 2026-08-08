@@ -47,7 +47,7 @@ export function EventCard({ event, index = 0 }: EventCardProps) {
             {event.description && (
               <p className="mt-1 text-sm text-muted-foreground line-clamp-2">{event.description}</p>
             )}
-            <div className="mt-2 flex items-center gap-3 text-xs text-muted-foreground">
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
               {event.event_type === "online" ? (
                 <span className="flex items-center gap-1">
                   <Video className="h-3.5 w-3.5" />

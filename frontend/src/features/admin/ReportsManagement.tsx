@@ -84,7 +84,52 @@ export function ReportsManagement({ statusFilter: initialStatus }: Props = {}) {
           <p className="mt-2 text-sm text-muted-foreground">No reports found.</p>
         </Card>
       ) : (
-        <Card>
+        <>
+          <div className="space-y-3 md:hidden">
+            {reports.map((report) => (
+              <Card key={report.id}>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">{report.reporter_name || "—"}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        reported {report.reported_user_name || "—"}
+                      </p>
+                    </div>
+                    <span
+                      className={cn(
+                        "inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                        report.status === "pending" && "bg-yellow-500/10 text-yellow-600",
+                        report.status === "resolved" && "bg-green-500/10 text-green-600",
+                        report.status === "dismissed" && "bg-gray-500/10 text-gray-600"
+                      )}
+                    >
+                      {report.status}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 text-xs">
+                    <span className="rounded-full bg-muted px-2 py-0.5">{report.entity_type}</span>
+                    <span className="text-muted-foreground">{formatDistanceToNow(new Date(report.created_at))}</span>
+                  </div>
+                  <p className="break-words text-sm text-muted-foreground">{report.reason}</p>
+                  {report.status === "pending" && (
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Resolve"
+                        onClick={() => { setResolveModal(report); setResolutionNotes(""); }}>
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" title="Dismiss"
+                        onClick={() => resolveMutation.mutate({ reportId: report.id, reportStatus: "dismissed" })}>
+                        <XCircle className="h-4 w-4 text-muted-foreground" />
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="hidden md:block">
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -141,7 +186,8 @@ export function ReportsManagement({ statusFilter: initialStatus }: Props = {}) {
               </tbody>
             </table>
           </CardContent>
-        </Card>
+          </Card>
+        </>
       )}
 
       {hasMore && (

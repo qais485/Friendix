@@ -37,7 +37,7 @@ export function EmptyFeed({ feedType }: EmptyFeedProps) {
   const config = FEED_CONFIG[feedType];
 
   return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/20 py-20 text-center">
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed bg-muted/20 px-4 py-12 text-center sm:py-20">
       <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50 text-muted-foreground/50">
         {config.icon}
       </div>

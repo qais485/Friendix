@@ -96,3 +96,4 @@ class EventTrackRequest(BaseModel):
 class EventTrackResponse(BaseModel):
     received: int
     duplicates: int
+    invalid: int = 0

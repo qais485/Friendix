@@ -23,6 +23,7 @@ from app.models.models import (
     InterestProfile, UserInterest, InterestEventSignal,
     ContentProfile,
     MetricsState,
+    LearningLoopState,
 )
 
 __all__ = [
@@ -50,4 +51,5 @@ __all__ = [
     "InterestProfile", "UserInterest", "InterestEventSignal",
     "ContentProfile",
     "MetricsState",
+    "LearningLoopState",
 ]

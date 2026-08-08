@@ -26,19 +26,21 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 # Default weight of each signal in the final rank score (renormalized by sum).
 DEFAULT_RANK_SIGNAL_WEIGHTS: dict[str, float] = {
     # Engagement (per-content, event derived).
-    "watch_time": 0.15,
-    "completion": 0.18,
-    "replay": 0.05,
+    "watch_time": 0.12,
+    "completion": 0.14,
+    "replay": 0.04,
     "likes": 0.08,
-    "comments": 0.08,
-    "shares": 0.09,
-    "saves": 0.07,
+    "comments": 0.07,
+    "shares": 0.08,
+    "saves": 0.06,
     # Content dynamics (precomputed content-profile metrics).
     "freshness": 0.08,
-    "popularity": 0.10,
-    "quality": 0.10,
+    # Reach-only popularity (log-normalized view volume; see ranking engine).
+    "popularity": 0.07,
+    "quality": 0.06,
     # Personalization (only applied when user interest data is available).
-    "interest": 0.02,
+    # Weighted heavily so engagement can no longer drown out preference.
+    "interest": 0.30,
 }
 
 
@@ -58,8 +60,9 @@ class RankingConfig(BaseSettings):
     # rate signal (likes/comments/shares/saves) = 1 - exp(-rate * RATE_SATURATION)
     # where rate = count / views.
     RATE_SATURATION: float = 2.0
-    # popularity = 1 - exp(-popularity_score * POPULARITY_SATURATION).
-    POPULARITY_SATURATION: float = 0.15
+    # popularity (reach) = log1p(views) / log1p(VOLUME_REF), saturating at 1.0.
+    # Log scaling keeps items that differ by orders of magnitude on one scale.
+    VOLUME_REF: float = 1000.0
     # Interest affinity: strength / (AFFINITY_SCALE + |strength|), summed across
     # matched dimensions and clamped to [-1, 1].
     AFFINITY_SCALE: float = 3.0

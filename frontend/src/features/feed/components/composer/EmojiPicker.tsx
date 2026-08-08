@@ -22,7 +22,7 @@ export function EmojiPicker({ onSelect, onClose }: EmojiPickerProps) {
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.15 }}
-      className="absolute right-0 top-full z-20 mt-2 w-64 rounded-2xl glass-card p-2 shadow-lg"
+      className="absolute right-0 top-full z-20 mt-2 w-64 max-w-[calc(100vw-2rem)] rounded-2xl glass-card p-2 shadow-lg"
     >
       <div className="mb-1 flex items-center justify-between px-1">
         <span className="text-xs font-medium text-muted-foreground">Emoji</span>

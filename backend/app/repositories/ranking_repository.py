@@ -4,6 +4,8 @@ from uuid import UUID
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
+from app.core.cache import cache_key, content_set_key, get_application_cache
+from app.core.cache_config import get_cache_config
 from app.models import ContentProfile, ContentEvent, ViewSession, UserInterest
 
 # Engagement events counted per content, weighted by the same events Phase 3
@@ -28,6 +30,8 @@ class RankingRepository:
 
     def __init__(self, db: Session):
         self.db = db
+        self._cache = get_application_cache()
+        self._cache_cfg = get_cache_config()
 
     # ── candidates ─────────────────────────────────────────
 
@@ -60,9 +64,30 @@ class RankingRepository:
     # ── engagement signals (from view sessions + raw events) ──
 
     def get_engagement(self, content_ids: list[UUID]) -> dict[UUID, dict]:
-        """Aggregate view + engagement counters per content id (no N+1)."""
+        """Aggregate view + engagement counters per content id (no N+1).
+
+        Results are cached for a short TTL (``FRIENDIX_CACHE_ENGAGEMENT_TTL_SECONDS``,
+        default 30s): the aggregate is shared across users and changes only as
+        new events land, so a 30s-stale value keeps feeds fast and consistent.
+        """
         if not content_ids:
             return {}
+        key = cache_key("engagement", content_set_key(content_ids))
+        cached = self._cache.get(key)
+        if cached is not None:
+            return {UUID(k): v for k, v in cached.items()}
+        result = self._compute_engagement(content_ids)
+        try:
+            self._cache.set(
+                key,
+                {str(k): v for k, v in result.items()},
+                ttl_seconds=self._cache_cfg.ENGAGEMENT_TTL_SECONDS,
+            )
+        except Exception:
+            pass
+        return result
+
+    def _compute_engagement(self, content_ids: list[UUID]) -> dict[UUID, dict]:
         result: dict[UUID, dict] = {
             cid: {
                 "views": 0,
@@ -118,14 +143,31 @@ class RankingRepository:
     # ── personalization ────────────────────────────────────
 
     def get_user_interests(self, user_id: UUID, top: int = 200) -> list[tuple[str, str, float]]:
-        """Return (interest_type, interest_key, strength) for a user's interests."""
+        """Return (interest_type, interest_key, strength) for a user's interests.
+
+        Cached briefly (``FRIENDIX_CACHE_INTERESTS_TTL_SECONDS``); interests only
+        change when the learning loop's interest builder runs, not per request.
+        """
+        key = cache_key("interests", str(user_id), str(top))
+        cached = self._cache.get(key)
+        if cached is not None:
+            return [tuple(item) for item in cached]
         rows = self.db.execute(
             select(UserInterest.interest_type, UserInterest.interest_key, UserInterest.strength)
             .where(UserInterest.user_id == user_id, UserInterest.strength != 0)
             .order_by(UserInterest.strength.desc())
             .limit(top)
         ).all()
-        return [(t, k, s) for t, k, s in rows]
+        result = [(t, k, s) for t, k, s in rows]
+        try:
+            self._cache.set(
+                key,
+                result,
+                ttl_seconds=self._cache_cfg.INTERESTS_TTL_SECONDS,
+            )
+        except Exception:
+            pass
+        return result
 
 
 def profile_features(row: ContentProfile) -> dict:

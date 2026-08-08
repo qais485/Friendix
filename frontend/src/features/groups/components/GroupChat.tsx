@@ -45,7 +45,7 @@ export function GroupChat({ group }: GroupChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-[400px]">
+    <div className="flex flex-col h-[320px] sm:h-[400px]">
       <div className="flex-1 overflow-y-auto space-y-3 p-4">
         {!messages || messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
@@ -76,18 +76,18 @@ export function GroupChat({ group }: GroupChatProps) {
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{msg.username}</span>
+                  <span className="min-w-0 truncate text-sm font-medium">{msg.username}</span>
                   {msg.is_announcement && (
-                    <span className="flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                    <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
                       <Megaphone className="h-2.5 w-2.5" />
                       Announcement
                     </span>
                   )}
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="shrink-0 text-[10px] text-muted-foreground">
                     {formatDistanceToNow(new Date(msg.created_at))}
                   </span>
                 </div>
-                <p className="mt-0.5 text-sm whitespace-pre-wrap">{msg.content}</p>
+                <p className="mt-0.5 break-words text-sm whitespace-pre-wrap">{msg.content}</p>
               </div>
             </motion.div>
           ))

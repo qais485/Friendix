@@ -11,9 +11,9 @@ interface FeedFiltersProps {
 
 export function FeedFilters({ sortBy, onSortChange }: FeedFiltersProps) {
   return (
-    <div className="flex items-center gap-2">
-      <Filter className="h-3.5 w-3.5 text-muted-foreground" />
-      <div className="flex gap-1">
+    <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+      <Filter className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+      <div className="flex shrink-0 gap-1">
         {FEED_SORT_OPTIONS.map((option) => (
           <Button
             key={option.value}

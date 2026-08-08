@@ -46,6 +46,7 @@ import { LiquidGlassFilter } from "@/components/LiquidGlassFilter";
 import { getPostBackgroundStyle } from "./composer";
 import { useAppearanceSettings, type PostCardBarAppearance } from "@/hooks/useAppearanceSettings";
 import { registerActivePost } from "@/lib/activePost";
+import { tracking } from "@/services/tracking";
 import type { Post } from "@/types";
 
 function barAppearanceClasses(
@@ -152,6 +153,8 @@ export const PostCard = memo(function PostCard({
 
   const { data: appearance } = useAppearanceSettings();
 
+  const impressionSentRef = useRef(false);
+
   // Register this post for visibility-based active detection (video playback).
   useEffect(() => {
     const el = cardRef.current;
@@ -161,8 +164,18 @@ export const PostCard = memo(function PostCard({
     handle.setOnActive((active) => {
       setIsActivePost(active);
       if (!active) setVideoEnded(false);
+      if (active && !impressionSentRef.current) {
+        impressionSentRef.current = true;
+        tracking.impression({
+          content_type: "post",
+          content_id: post.id,
+          creator_id: post.user_id,
+          context: "feed",
+        });
+      }
     });
     return () => handle.unregister();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleVideoEnded = useCallback(() => setVideoEnded(true), []);
@@ -192,6 +205,16 @@ export const PostCard = memo(function PostCard({
     const target = e.target as HTMLElement;
     if (target.closest("button, a, [role='menuitem'], input, textarea")) return;
     onOpenPost(post);
+  };
+
+  const handleFollow = () => {
+    tracking.follow({
+      content_type: "post",
+      content_id: post.id,
+      creator_id: post.user_id,
+      context: "feed",
+    });
+    onFollow?.(post.user_id);
   };
 
   useEffect(() => {
@@ -322,7 +345,7 @@ export const PostCard = memo(function PostCard({
           ) : (
             <MenuItem onClick={() => onHide?.(post.id)} icon={EyeOff} label="Hide" />
           )}
-          <MenuItem onClick={() => onFollow?.(post.user_id)} icon={UserCheck} label="Follow" />
+          <MenuItem onClick={handleFollow} icon={UserCheck} label="Follow" />
           <MenuItem onClick={() => onAddFriend?.(post.user_id)} icon={UserPlus} label="Add Friend" />
           <MenuItem onClick={() => onAddCloseFriend?.(post.user_id)} icon={Star} label="Add to Close Friends" />
           <div className="my-1 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -384,7 +407,7 @@ export const PostCard = memo(function PostCard({
                 variant="ghost"
                 size="icon-sm"
                 className={cn("h-7 w-7 rounded-full hover:bg-transparent hover:backdrop-blur-none active:scale-95", (hasMedia || hasBackground) ? headerFg.base : "text-muted-foreground")}
-                onClick={() => onFollow?.(post.user_id)}
+                onClick={handleFollow}
                 aria-label="Follow user"
               >
                 <UserCheck className="h-3.5 w-3.5" />
@@ -441,7 +464,7 @@ export const PostCard = memo(function PostCard({
       {hasBackground && post.content && (
         <div className="relative flex aspect-[4/5] w-full items-center justify-center p-6" style={bgStyle.style}>
           <div
-            className="w-full text-center text-xl font-bold leading-relaxed text-white drop-shadow-lg prose-invert"
+            className="w-full break-words text-center text-xl font-bold leading-relaxed text-white drop-shadow-lg prose-invert"
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }}
           />
           {(post.feeling_type || post.location_name) && (
@@ -475,7 +498,7 @@ export const PostCard = memo(function PostCard({
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-8 gap-1 rounded-full px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
+                  "h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
                   post.is_liked
                     ? "text-red-500"
                     : footerFg.base
@@ -490,7 +513,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => setShowComments(!showComments)}
                 aria-label="Comments"
                 aria-expanded={showComments}
@@ -501,7 +524,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onRepost?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label="Repost"
@@ -512,7 +535,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onQuote?.(post.id)}
                 aria-label="Quote post"
               >
@@ -522,7 +545,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 rounded-full p-2 ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 rounded-full p-1.5 sm:p-2 ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => post.is_saved ? onUnsave?.(post.id) : onSave?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label={post.is_saved ? "Unsave post" : "Save post"}
@@ -623,7 +646,7 @@ export const PostCard = memo(function PostCard({
                 variant="ghost"
                 size="sm"
                 className={cn(
-                  "h-8 gap-1 rounded-full px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
+                  "h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
                   post.is_liked
                     ? "text-red-500"
                     : footerFg.base
@@ -638,7 +661,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => setShowComments(!showComments)}
                 aria-label="Comments"
                 aria-expanded={showComments}
@@ -649,7 +672,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onRepost?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label="Repost"
@@ -660,7 +683,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 gap-1 rounded-full px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => onQuote?.(post.id)}
                 aria-label="Quote post"
               >
@@ -670,7 +693,7 @@ export const PostCard = memo(function PostCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className={`h-8 rounded-full p-2 ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
+                className={`h-8 rounded-full p-1.5 sm:p-2 ${footerFg.base} hover:bg-transparent hover:backdrop-blur-none active:scale-95`}
                 onClick={() => post.is_saved ? onUnsave?.(post.id) : onSave?.(post.id)}
                 disabled={isAnyFeedMutationPending}
                 aria-label={post.is_saved ? "Unsave post" : "Save post"}
@@ -700,7 +723,7 @@ export const PostCard = memo(function PostCard({
             </div>
             {post.content && !hasBackground && (
               <div className="px-3 pt-1">
-                <div className={`text-[13px] leading-snug ${footerFg.base}`}>
+                <div className={`break-words text-[13px] leading-snug ${footerFg.base}`}>
                   {post.content.includes("<") ? (
                     captionExpanded ? (
                       <div
@@ -887,7 +910,7 @@ export const PostCard = memo(function PostCard({
               variant="ghost"
               size="sm"
               className={cn(
-                "h-8 gap-1 rounded-full px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
+                "h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm hover:bg-transparent hover:backdrop-blur-none active:scale-95",
                 post.is_liked
                   ? "text-red-500"
                   : "text-muted-foreground"
@@ -902,7 +925,7 @@ export const PostCard = memo(function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
+              className="h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => setShowComments(!showComments)}
               aria-label="Comments"
               aria-expanded={showComments}
@@ -913,7 +936,7 @@ export const PostCard = memo(function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
+              className="h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => onRepost?.(post.id)}
               disabled={isAnyFeedMutationPending}
               aria-label="Repost"
@@ -924,7 +947,7 @@ export const PostCard = memo(function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 gap-1 rounded-full px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
+              className="h-8 gap-1 rounded-full px-1.5 sm:px-2 text-sm text-muted-foreground hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => onQuote?.(post.id)}
               aria-label="Quote post"
             >
@@ -934,7 +957,7 @@ export const PostCard = memo(function PostCard({
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 rounded-full p-2 hover:bg-transparent hover:backdrop-blur-none active:scale-95"
+              className="h-8 rounded-full p-1.5 sm:p-2 hover:bg-transparent hover:backdrop-blur-none active:scale-95"
               onClick={() => post.is_saved ? onUnsave?.(post.id) : onSave?.(post.id)}
               disabled={isAnyFeedMutationPending}
               aria-label={post.is_saved ? "Unsave post" : "Save post"}
@@ -968,7 +991,7 @@ export const PostCard = memo(function PostCard({
       {/* ── Caption (text-only posts) ──────────────────── */}
       {!hasBackground && !hasMedia && post.content && (
         <div className="px-3 pb-2">
-          <div className="text-[13px] leading-snug">
+          <div className="break-words text-[13px] leading-snug">
             {post.content.includes("<") ? (
               captionExpanded ? (
                 <div

@@ -11,10 +11,10 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: n
   return (
     <Card>
       <CardContent className="flex items-center gap-4 p-4">
-        <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${color}`}>
+        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${color}`}>
           <Icon className="h-6 w-6" />
         </div>
-        <div>
+        <div className="min-w-0">
           <p className="text-2xl font-bold">{value.toLocaleString()}</p>
           <p className="text-xs text-muted-foreground">{label}</p>
         </div>
@@ -84,10 +84,10 @@ export function AnalyticsDashboard() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-500/10">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-yellow-500/10">
               <AlertTriangle className="h-5 w-5 text-yellow-600" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xl font-bold">{analytics.pending_reports}</p>
               <p className="text-xs text-muted-foreground">Pending Reports</p>
             </div>
@@ -95,10 +95,10 @@ export function AnalyticsDashboard() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-500/10">
               <BadgeCheck className="h-5 w-5 text-blue-600" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xl font-bold">{analytics.pending_verifications}</p>
               <p className="text-xs text-muted-foreground">Pending Verifications</p>
             </div>
@@ -106,10 +106,10 @@ export function AnalyticsDashboard() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-500/10">
               <UserPlus className="h-5 w-5 text-green-600" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xl font-bold">{analytics.new_users_today}</p>
               <p className="text-xs text-muted-foreground">New Users Today</p>
             </div>
@@ -117,10 +117,10 @@ export function AnalyticsDashboard() {
         </Card>
         <Card>
           <CardContent className="flex items-center gap-3 p-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-purple-500/10">
               <PenLine className="h-5 w-5 text-purple-600" />
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-xl font-bold">{analytics.new_posts_today}</p>
               <p className="text-xs text-muted-foreground">New Posts Today</p>
             </div>

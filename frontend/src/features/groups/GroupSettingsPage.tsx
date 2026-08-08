@@ -79,15 +79,15 @@ export function GroupSettingsPage() {
           <div className="pt-12 md:pt-0">
             <Link
               to={`/groups/${groupSlug}`}
-              className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
+              className="mb-4 inline-flex max-w-full items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-all duration-200"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back to {group.name}
+              <ArrowLeft className="h-4 w-4 shrink-0" />
+              <span className="truncate">Back to {group.name}</span>
             </Link>
             <h1 className="text-2xl font-bold tracking-tight text-gradient">Group Settings</h1>
           </div>
 
-          <div className="space-y-5 rounded-2xl glass-card p-6">
+          <div className="space-y-5 rounded-2xl glass-card p-4 sm:p-6">
             <div className="space-y-2">
               <label className="text-sm font-medium block">Group Name</label>
               <input
@@ -160,7 +160,7 @@ export function GroupSettingsPage() {
             </Button>
           </div>
 
-          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 shadow-card p-6">
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/5 shadow-card p-4 sm:p-6">
             <h3 className="font-bold text-destructive">Danger Zone</h3>
             <p className="mt-1.5 text-sm text-muted-foreground">
               Deleting this group will remove all members, messages, events, and polls. This action cannot be undone.

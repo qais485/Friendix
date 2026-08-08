@@ -41,7 +41,7 @@ export function PostSearchResults({ posts }: PostSearchResultsProps) {
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <p className="font-semibold text-sm">
+                <p className="truncate text-sm font-semibold">
                   {post.username || "Unknown"}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -50,7 +50,7 @@ export function PostSearchResults({ posts }: PostSearchResultsProps) {
               </div>
             </div>
             {post.content && (
-              <p className="mt-3 text-sm line-clamp-3 whitespace-pre-wrap">
+              <p className="mt-3 line-clamp-3 break-words whitespace-pre-wrap text-sm">
                 {post.content}
               </p>
             )}

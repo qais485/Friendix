@@ -19,7 +19,7 @@ export function MobileBottomNav() {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex flex-col items-center gap-1 px-4 py-2 text-[10px] font-semibold transition-all duration-200 rounded-2xl",
+                "flex min-w-0 flex-col items-center gap-1 px-2 py-2 text-[10px] font-semibold transition-all duration-200 rounded-2xl",
                 isActive
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"

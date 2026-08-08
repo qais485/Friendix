@@ -91,21 +91,21 @@ export function GroupAnnouncements({ group }: GroupAnnouncementsProps) {
                   height={24}
                   loading="lazy"
                   decoding="async"
-                  className="h-6 w-6 rounded-full object-cover"
+                  className="h-6 w-6 shrink-0 rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
+                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
                   {(ann.username || "U")[0].toUpperCase()}
                 </div>
               )}
-              <span className="text-sm font-medium">{ann.username}</span>
-              {ann.is_pinned && <Pin className="h-3 w-3 text-primary" />}
-              <span className="ml-auto text-xs text-muted-foreground">
+              <span className="min-w-0 truncate text-sm font-medium">{ann.username}</span>
+              {ann.is_pinned && <Pin className="h-3 w-3 shrink-0 text-primary" />}
+              <span className="ml-auto shrink-0 text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(ann.created_at))}
               </span>
             </div>
             <h4 className="font-semibold text-sm">{ann.title}</h4>
-            <p className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">{ann.content}</p>
+            <p className="mt-1 break-words text-sm text-muted-foreground whitespace-pre-wrap">{ann.content}</p>
           </motion.div>
         ))
       )}

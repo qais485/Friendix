@@ -68,14 +68,14 @@ export function FollowList({ users, isLoading, type, onFollow, onUnfollow, isPro
                   <UserPlus className="h-5 w-5" />
                 </div>
               )}
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-semibold">{user.full_name || "Unknown User"}</p>
                   {user.is_verified && (
-                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">✓</span>
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">✓</span>
                   )}
                   {user.is_friend && (
-                    <span className="inline-flex h-4 items-center gap-0.5 rounded-full bg-green-500/15 px-1.5 text-[10px] font-medium text-green-600">
+                    <span className="inline-flex h-4 shrink-0 items-center gap-0.5 rounded-full bg-green-500/15 px-1.5 text-[10px] font-medium text-green-600">
                       <Users className="h-2.5 w-2.5" /> Friend
                     </span>
                   )}
@@ -90,11 +90,11 @@ export function FollowList({ users, isLoading, type, onFollow, onUnfollow, isPro
               </div>
             </div>
             {type === "followers" ? (
-              <Button variant="outline" size="sm" className="rounded-full" onClick={() => onFollow?.(user.id)} disabled={isProcessing}>
+              <Button variant="outline" size="sm" className="shrink-0 rounded-full" onClick={() => onFollow?.(user.id)} disabled={isProcessing}>
                 <UserPlus className="mr-1.5 h-4 w-4" /> Follow
               </Button>
             ) : (
-              <Button variant="outline" size="sm" className="rounded-full" onClick={() => onUnfollow?.(user.id)} disabled={isProcessing}>
+              <Button variant="outline" size="sm" className="shrink-0 rounded-full" onClick={() => onUnfollow?.(user.id)} disabled={isProcessing}>
                 <UserMinus className="mr-1.5 h-4 w-4" /> Unfollow
               </Button>
             )}

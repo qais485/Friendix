@@ -39,7 +39,7 @@ export function GroupHeader({ group }: GroupHeaderProps) {
         </div>
       )}
       <div className="p-5">
-        <div className="flex items-start gap-4">
+        <div className="flex flex-wrap items-start gap-4">
           {group.cover_url ? null : (
             <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-xl font-bold text-primary">
               {group.name[0]?.toUpperCase()}

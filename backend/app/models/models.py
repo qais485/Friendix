@@ -1,7 +1,7 @@
 import uuid
 import sqlalchemy
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text, Integer, Float
+from sqlalchemy import Column, String, Boolean, DateTime, ForeignKey, Text, Integer, Float, BigInteger
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from app.database.base import Base
@@ -1500,6 +1500,10 @@ class UserInterest(Base, TimestampMixin):
     total_signals = Column(Integer, default=0, nullable=False)
     first_seen_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     last_interaction_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
+    # Last time the Learning Loop (Phase 6) bulk-decayed this row's strength.
+    # Null means "decay from first_seen_at / last_interaction_at". Prevents the
+    # periodic decay pass from double-decaying interests between interactions.
+    last_decayed_at = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User", backref="user_interests")
 
@@ -1588,3 +1592,32 @@ class MetricsState(Base, TimestampMixin):
     id = Column(Integer, primary_key=True, default=1)
     last_occurred_at = Column(DateTime(timezone=True), nullable=True)
     last_event_id = Column(UUID(as_uuid=True), nullable=True)
+
+
+class LearningLoopState(Base, TimestampMixin):
+    """Single-row control + telemetry for the Phase 6 Learning Loop.
+
+    Tracks when each driver (interests / content metrics) last ran and how many
+    signals were applied, so the scheduled loop is idempotent, observable, and
+    easy to backfill. ``decay_last_run_at`` gates the bulk interest-decay pass.
+    """
+
+    __tablename__ = "learning_loop_state"
+
+    id = Column(Integer, primary_key=True, default=1)
+
+    # Warehouse watermarks are stored on their own tables (interest_profiles,
+    # metrics_state); this row only records *aggregate progress* surfaced to ops.
+    interests_last_run_at = Column(DateTime(timezone=True), nullable=True)
+    interests_total_events = Column(BigInteger, default=0, nullable=False)
+    interests_total_signals = Column(BigInteger, default=0, nullable=False)
+    interests_version = Column(Integer, default=0, nullable=False)
+
+    metrics_last_run_at = Column(DateTime(timezone=True), nullable=True)
+    metrics_total_events = Column(BigInteger, default=0, nullable=False)
+    metrics_profiles_updated = Column(BigInteger, default=0, nullable=False)
+
+    # Bulk decay pass (fades stale interests between interactions).
+    decay_last_run_at = Column(DateTime(timezone=True), nullable=True)
+    decay_total_rows = Column(BigInteger, default=0, nullable=False)
+    decay_removed = Column(BigInteger, default=0, nullable=False)

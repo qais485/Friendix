@@ -77,14 +77,14 @@ function EventAttendeeItem({ attendee, index }: { attendee: any; index: number }
         )}
       </Link>
       <div className="min-w-0 flex-1">
-        <Link to={`/profile/${attendee.username}`} className="text-sm font-medium hover:underline">
+        <Link to={`/profile/${attendee.username}`} className="block truncate text-sm font-medium hover:underline">
           {attendee.username}
         </Link>
         <p className="text-xs text-muted-foreground capitalize">{attendee.status}</p>
       </div>
 
       {!isSelf && relationship && (
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           {!relationship.are_friends && !relationship.are_blocked && !relationship.is_following && (
             <Button
               variant="ghost"

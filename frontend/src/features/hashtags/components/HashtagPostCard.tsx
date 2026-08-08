@@ -38,7 +38,7 @@ export function HashtagPostCard({ post, index = 0 }: HashtagPostCardProps) {
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <p className="font-bold text-sm">
+            <p className="truncate font-bold text-sm">
               {post.username || "Unknown"}
             </p>
             <p className="text-xs text-muted-foreground">
@@ -47,7 +47,7 @@ export function HashtagPostCard({ post, index = 0 }: HashtagPostCardProps) {
           </div>
         </div>
         {post.content && (
-          <p className="mt-3 text-sm line-clamp-4 whitespace-pre-wrap">
+          <p className="mt-3 text-sm line-clamp-4 whitespace-pre-wrap break-words">
             {post.content}
           </p>
         )}

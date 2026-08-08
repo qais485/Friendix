@@ -6,6 +6,7 @@ from app.repositories.feed_repository import FeedRepository, encode_cursor, enco
 from app.repositories.profile_repository import ProfileRepository
 from app.repositories.hashtag_repository import HashtagRepository
 from app.services.notification_service import NotificationService
+from app.services.content_profile_sync import drop_content_profile, sync_content_profile
 from app.schemas.feed import (
     PostCreate,
     PostUpdate,
@@ -223,6 +224,7 @@ class FeedService:
             if cleaned:
                 self.hashtag_repo.link_post_to_hashtags(post.id, cleaned)
 
+        sync_content_profile(self.db, "post", post.id)
         return self._enrich_post(post, user_id)
 
     def update_post(self, user_id: UUID, post_id: UUID, data: PostUpdate) -> PostResponse:
@@ -237,6 +239,7 @@ class FeedService:
             update_data["image_urls"] = ",".join(update_data["image_urls"])
 
         updated = self.feed_repo.update_post(post, **update_data)
+        sync_content_profile(self.db, "post", post.id)
         return self._enrich_post(updated, user_id)
 
     def delete_post(self, user_id: UUID, post_id: UUID) -> bool:
@@ -246,6 +249,7 @@ class FeedService:
         if post.user_id != user_id:
             raise HTTPException(status_code=403, detail="Not authorized")
 
+        drop_content_profile(self.db, "post", post_id)
         media_urls = self._collect_post_media_urls(post)
         logger.info("Deleting post %s with %d media files", post_id, len(media_urls))
 

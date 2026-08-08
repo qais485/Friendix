@@ -166,13 +166,13 @@ export function CallModal({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          className="relative flex w-full max-w-md flex-col items-center rounded-2xl bg-background p-8 shadow-2xl"
+          className="relative flex w-full max-w-md flex-col items-center rounded-2xl bg-background p-4 shadow-2xl sm:p-8"
         >
           <button
             onClick={handleEndCall}
@@ -188,7 +188,7 @@ export function CallModal({
                 autoPlay
                 playsInline
                 preload="auto"
-                className="h-64 w-full object-cover"
+                className="h-48 w-full object-cover sm:h-64"
               />
               <video
                 ref={localVideoRef}
@@ -196,7 +196,7 @@ export function CallModal({
                 playsInline
                 muted
                 preload="auto"
-                className="absolute bottom-20 right-6 h-24 w-32 rounded-lg border-2 border-white object-cover"
+                className="absolute bottom-20 right-6 h-20 w-28 rounded-lg border-2 border-white object-cover sm:h-24 sm:w-32"
               />
             </div>
           )}
@@ -215,7 +215,7 @@ export function CallModal({
                 <User className="h-12 w-12 text-primary" />
               )}
             </div>
-            <h2 className="text-xl font-semibold">{recipientName}</h2>
+            <h2 className="max-w-full break-words text-center text-xl font-semibold">{recipientName}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               {callState === "ringing" && "Ringing..."}
               {callState === "connecting" && "Connecting..."}

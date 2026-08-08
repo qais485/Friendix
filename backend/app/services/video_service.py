@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.repositories.video_repository import VideoRepository
 from app.repositories.profile_repository import ProfileRepository
+from app.services.content_profile_sync import drop_content_profile, sync_content_profile
 from app.schemas.videos import (
     VideoCreate, VideoUpdate, VideoResponse, VideoListResponse,
     VideoCommentCreate, VideoCommentResponse, VideoCommentListResponse,
@@ -31,12 +32,18 @@ class VideoService:
             is_verified=getattr(user, "is_verified", False),
         )
 
-    def _enrich_video(self, video, user_id: UUID | None = None) -> VideoResponse:
+    def _enrich_video(self, video, user_id: UUID | None = None, liked_ids=None, watch_later_ids=None) -> VideoResponse:
         is_liked = False
         is_watch_later = False
         if user_id:
-            is_liked = self.repo.is_liked(user_id, video.id)
-            is_watch_later = self.repo.is_watch_later(user_id, video.id)
+            if liked_ids is not None:
+                is_liked = video.id in liked_ids
+            else:
+                is_liked = self.repo.is_liked(user_id, video.id)
+            if watch_later_ids is not None:
+                is_watch_later = video.id in watch_later_ids
+            else:
+                is_watch_later = self.repo.is_watch_later(user_id, video.id)
         cat_brief = None
         if video.category:
             cat_brief = VideoCategoryBrief(id=video.category.id, name=video.category.name, slug=video.category.slug)
@@ -68,6 +75,21 @@ class VideoService:
             return str(videos[-1].id)
         return None
 
+    def _enrich_videos_batch(self, videos: list, user_id: UUID | None = None) -> list[VideoResponse]:
+        """Batch-enrich videos with one like + one watch-later query (no N+1)."""
+        if not videos:
+            return []
+        liked_ids: set = set()
+        watch_later_ids: set = set()
+        if user_id:
+            video_ids = [v.id for v in videos]
+            liked_ids = set(self.repo.get_liked_video_ids(user_id, video_ids))
+            watch_later_ids = set(self.repo.get_watch_later_video_ids(user_id, video_ids))
+        return [
+            self._enrich_video(v, user_id, liked_ids, watch_later_ids)
+            for v in videos
+        ]
+
     # ── Categories ─────────────────────────────────────────
 
     def get_categories(self) -> list[VideoCategoryResponse]:
@@ -95,6 +117,7 @@ class VideoService:
             kwargs["height"] = data.height
         kwargs["privacy"] = data.privacy
         video = self.repo.create_video(user_id, **kwargs)
+        sync_content_profile(self.db, "video", video.id)
         return self._enrich_video(video, user_id)
 
     def get_video(self, video_id: UUID, user_id: UUID | None = None) -> VideoResponse:
@@ -113,6 +136,7 @@ class VideoService:
             raise HTTPException(status_code=403, detail="Not authorized")
         update_data = data.model_dump(exclude_unset=True)
         updated = self.repo.update_video(video, **update_data)
+        sync_content_profile(self.db, "video", video_id)
         return self._enrich_video(updated, user_id)
 
     def delete_video(self, user_id: UUID, video_id: UUID) -> None:
@@ -121,6 +145,7 @@ class VideoService:
             raise HTTPException(status_code=404, detail="Video not found")
         if video.user_id != user_id:
             raise HTTPException(status_code=403, detail="Not authorized")
+        drop_content_profile(self.db, "video", video_id)
         self.repo.delete_video(video)
 
     def list_videos(self, user_id: UUID, category_id: UUID | None = None, cursor: str | None = None, limit: int = 20) -> VideoListResponse:

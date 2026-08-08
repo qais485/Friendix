@@ -93,6 +93,21 @@ export function useHomeFeed(userId: string | undefined) {
   });
 }
 
+export function useForYouFeed(userId: string | undefined) {
+  return useInfiniteQuery({
+    queryKey: ["feed", "for-you", userId],
+    queryFn: async ({ pageParam }) => {
+      const { data } = await feedApi.getForYouPosts(pageParam, 10);
+      return data;
+    },
+    getNextPageParam: (lastPage: FeedResponse) => (lastPage.has_more ? lastPage.next_cursor : undefined),
+    initialPageParam: undefined as string | undefined,
+    enabled: !!userId,
+    staleTime: 300_000,
+    placeholderData: keepPreviousData,
+  });
+}
+
 export function useFollowingFeed(userId: string | undefined) {
   return useInfiniteQuery({
     queryKey: ["feed", "following", userId],

@@ -28,14 +28,14 @@ const periodOptions = [
 ];
 
 const StatCard = ({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ComponentType<{ className?: string }> }) => (
-  <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
-    <div className="flex items-center justify-between mb-3">
-      <span className="text-sm font-bold text-muted-foreground">{label}</span>
-      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-purple-500/15">
+  <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
+    <div className="flex items-center justify-between gap-2 mb-3">
+      <span className="min-w-0 text-sm font-bold text-muted-foreground break-words">{label}</span>
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary/15 to-purple-500/15">
         <Icon className="w-4 h-4 text-primary" />
       </div>
     </div>
-    <p className="text-2xl font-black text-foreground tracking-tight">{typeof value === 'number' ? value.toLocaleString() : value}</p>
+    <p className="text-xl sm:text-2xl font-black text-foreground tracking-tight break-words">{typeof value === 'number' ? value.toLocaleString() : value}</p>
   </div>
 );
 
@@ -88,7 +88,7 @@ function ProfileViewsTab({ data }: { data: ProfileViewSummary }) {
         <StatCard label="Total Profile Views" value={data.total} icon={Eye} />
       </div>
       {data.time_series.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-bold text-muted-foreground mb-3">Views Over Time</h4>
           <MiniBarChart data={data.time_series} valueKey="count" color="bg-primary" />
           <div className="flex justify-between mt-3 text-xs text-muted-foreground">
@@ -99,12 +99,12 @@ function ProfileViewsTab({ data }: { data: ProfileViewSummary }) {
         </div>
       )}
       {data.top_viewers.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Top Viewers</h4>
           <div className="space-y-2">
             {data.top_viewers.map((v) => (
-              <div key={v.user_id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-all duration-200">
-                <div className="flex items-center gap-3">
+              <div key={v.user_id} className="flex items-center justify-between gap-3 p-3 rounded-xl hover:bg-muted/50 transition-all duration-200">
+                <div className="flex min-w-0 items-center gap-3">
                   <img
                     src={getCloudinaryTransformedUrl(v.avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${v.username}`, "avatar")}
                     alt=""
@@ -112,11 +112,11 @@ function ProfileViewsTab({ data }: { data: ProfileViewSummary }) {
                     height={36}
                     loading="lazy"
                     decoding="async"
-                    className="w-9 h-9 rounded-full ring-2 ring-border"
+                    className="w-9 h-9 shrink-0 rounded-full ring-2 ring-border"
                   />
-                  <span className="text-sm font-medium text-foreground">{v.full_name || v.username}</span>
+                  <span className="truncate text-sm font-medium text-foreground">{v.full_name || v.username}</span>
                 </div>
-                <span className="text-xs font-medium text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full">{v.views} views</span>
+                <span className="shrink-0 text-xs font-medium text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-full">{v.views} views</span>
               </div>
             ))}
           </div>
@@ -136,19 +136,19 @@ function PostReachTab({ data }: { data: PostAnalytics }) {
         <StatCard label="Engagement Rate" value={`${data.engagement_rate}%`} icon={TrendingUp} />
       </div>
       {data.time_series.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Posts Over Time</h4>
           <MiniBarChart data={data.time_series} valueKey="count" color="bg-primary" />
         </div>
       )}
       {data.top_posts.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Top Posts</h4>
           <div className="space-y-2">
             {data.top_posts.map((p) => (
               <div key={p.id} className="p-4 rounded-xl hover:bg-muted/50 transition-all duration-200">
                 <p className="text-sm text-foreground line-clamp-2">{p.content}</p>
-                <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
                   <span>{p.likes_count} likes</span>
                   <span>{p.comments_count} comments</span>
                   <span>{p.shares_count} shares</span>
@@ -171,22 +171,22 @@ function EngagementTab({ data }: { data: EngagementData }) {
         <StatCard label="Avg Engagement Rate" value={`${data.avg_engagement_rate}%`} icon={TrendingUp} />
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
           <h4 className="text-xs font-medium text-muted-foreground mb-2">Posts</h4>
           <p className="text-xl font-bold text-foreground">{data.posts.total_posts}</p>
           <p className="text-xs text-muted-foreground mt-1">{data.posts.total_engagement} interactions</p>
         </div>
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
           <h4 className="text-xs font-medium text-muted-foreground mb-2">Stories</h4>
           <p className="text-xl font-bold text-foreground">{data.stories.total_stories}</p>
           <p className="text-xs text-muted-foreground mt-1">{data.stories.total_views} views</p>
         </div>
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
           <h4 className="text-xs font-medium text-muted-foreground mb-2">Reels</h4>
           <p className="text-xl font-bold text-foreground">{data.reels.total_reels}</p>
           <p className="text-xs text-muted-foreground mt-1">{data.reels.total_views} views</p>
         </div>
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated hover:-translate-y-0.5">
           <h4 className="text-xs font-medium text-muted-foreground mb-2">Videos</h4>
           <p className="text-xl font-bold text-foreground">{data.videos.total_videos}</p>
           <p className="text-xs text-muted-foreground mt-1">{data.videos.total_views} views</p>
@@ -206,7 +206,7 @@ function FollowersGrowthTab({ data }: { data: FollowersGrowthSummary }) {
         <StatCard label="New Following" value={`+${data.new_following}`} icon={TrendingUp} />
       </div>
       {data.time_series.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">New Followers Over Time</h4>
           <MiniBarChart data={data.time_series} valueKey="count" color="bg-primary" />
           <div className="flex justify-between mt-3 text-xs text-muted-foreground">
@@ -230,7 +230,7 @@ function StoryAnalyticsTab({ data }: { data: StoryAnalyticsSummary }) {
         <StatCard label="Avg Views" value={data.avg_views_per_story} icon={TrendingUp} />
       </div>
       {data.time_series.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Stories Over Time</h4>
           <MiniBarChart data={data.time_series} valueKey="count" color="bg-primary" />
         </div>
@@ -249,19 +249,19 @@ function ReelAnalyticsTab({ data }: { data: ReelAnalyticsSummary }) {
         <StatCard label="Avg Views" value={data.avg_views_per_reel} icon={TrendingUp} />
       </div>
       {data.time_series.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Reels Over Time</h4>
           <MiniBarChart data={data.time_series} valueKey="views" color="bg-primary" />
         </div>
       )}
       {data.top_reels.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Top Reels</h4>
           <div className="space-y-2">
             {data.top_reels.map((r) => (
               <div key={r.id} className="p-4 rounded-xl hover:bg-muted/50 transition-all duration-200">
                 <p className="text-sm text-foreground line-clamp-2">{r.caption}</p>
-                <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
                   <span>{r.views_count} views</span>
                   <span>{r.likes_count} likes</span>
                 </div>
@@ -284,19 +284,19 @@ function VideoAnalyticsTab({ data }: { data: VideoAnalyticsSummary }) {
         <StatCard label="Avg Views" value={data.avg_views_per_video} icon={TrendingUp} />
       </div>
       {data.time_series.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Videos Over Time</h4>
           <MiniBarChart data={data.time_series} valueKey="views" color="bg-primary" />
         </div>
       )}
       {data.top_videos.length > 0 && (
-        <div className="glass-card rounded-2xl p-5 transition-all duration-200 hover:shadow-elevated">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 transition-all duration-200 hover:shadow-elevated">
           <h4 className="text-sm font-medium text-muted-foreground mb-3">Top Videos</h4>
           <div className="space-y-2">
             {data.top_videos.map((v) => (
               <div key={v.id} className="p-4 rounded-xl hover:bg-muted/50 transition-all duration-200">
                 <p className="text-sm font-medium text-foreground">{v.title}</p>
-                <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
                   <span>{v.views_count} views</span>
                   <span>{v.likes_count} likes</span>
                 </div>
@@ -363,12 +363,12 @@ export default function AnalyticsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-6 bg-gradient-to-br from-background via-background to-primary/5 min-h-screen">
-      <div className="flex items-center justify-between pt-12 md:pt-0">
-        <div>
+      <div className="flex items-center justify-between gap-4 pt-12 md:pt-0">
+        <div className="min-w-0 flex-1">
           <h1 className="text-2xl font-black tracking-tight text-gradient">Analytics</h1>
           <p className="text-sm text-muted-foreground mt-0.5">Track your content performance</p>
         </div>
-        <div>
+        <div className="shrink-0">
           <label htmlFor="analytics-period" className="sr-only">Time period</label>
           <select
             id="analytics-period"
@@ -392,7 +392,7 @@ export default function AnalyticsPage() {
             aria-selected={activeTab === t.id}
             aria-controls={`panel-${t.id}`}
             onClick={() => setActiveTab(t.id)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap shrink-0 transition-all duration-200 ${
               activeTab === t.id
                 ? 'bg-gradient-to-r from-primary to-purple-500 text-primary-foreground shadow-glow'
                 : 'glass-card text-muted-foreground hover:bg-muted/60 hover:text-foreground hover:backdrop-blur-sm'

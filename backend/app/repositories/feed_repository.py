@@ -1,6 +1,6 @@
 from uuid import UUID
 from datetime import datetime
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_, or_, desc, func, text
 from app.models import Post, PostLike, PostSave, PostHide, FeedPosition, Friendship, CloseFriend, Follow, User, Poll, PollOption, PollVote, BlockedUser, Mute
 
@@ -74,6 +74,17 @@ class FeedRepository:
 
     def get_post_by_id(self, post_id: UUID) -> Post | None:
         return self.db.query(Post).filter(Post.id == post_id).first()
+
+    def get_posts_by_ids(self, post_ids: list[UUID]) -> list[Post]:
+        """Fetch many posts in one query, pre-loading shared posts (no N+1)."""
+        if not post_ids:
+            return []
+        return (
+            self.db.query(Post)
+            .options(joinedload(Post.shared_post))
+            .filter(Post.id.in_(post_ids))
+            .all()
+        )
 
     def update_post(self, post: Post, **kwargs) -> Post:
         for key, value in kwargs.items():

@@ -141,12 +141,12 @@ export function PrivacySettingsPage() {
                           : "hover:bg-muted/50"
                       )}
                     >
-                      <div>
+                      <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold">{option.label}</p>
                         <p className="text-xs text-muted-foreground">{option.description}</p>
                       </div>
                       {settings.profile_visibility === option.value && (
-                        <div className="h-2.5 w-2.5 rounded-full bg-primary" />
+                        <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-primary" />
                       )}
                     </button>
                   ))}

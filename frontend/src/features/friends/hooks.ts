@@ -1,6 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { friendsApi } from "@/services/friendsApi";
-import type { FavoriteUpdate, MuteUpdate } from "@/types";
+import type {
+  FavoriteUpdate,
+  MuteUpdate,
+  FriendDetail,
+  FollowUser,
+  FollowRequestDetail,
+} from "@/types";
 
 export function useFriends(userId: string | undefined, targetUserId?: string) {
   return useQuery({
@@ -201,12 +207,9 @@ export function useSendFriendRequest(userId: string) {
       const previous = queryClient.getQueryData(["friends", "suggestions", userId]);
 
       // Optimistically remove from suggestions
-      queryClient.setQueryData(["friends", "suggestions", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          suggestions: (old.suggestions || []).filter((s: any) => s.user?.id !== addresseeId),
-        };
+      queryClient.setQueryData(["friends", "suggestions", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((s) => s.id !== addresseeId);
       });
 
       return { previous };
@@ -234,12 +237,9 @@ export function useAcceptFriendRequest(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "pending", "received", userId] });
       const previous = queryClient.getQueryData(["friends", "pending", "received", userId]);
 
-      queryClient.setQueryData(["friends", "pending", "received", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          requests: (old.requests || []).filter((r: any) => r.id !== friendshipId),
-        };
+      queryClient.setQueryData(["friends", "pending", "received", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((r) => r.friendship_id !== friendshipId);
       });
 
       return { previous };
@@ -267,12 +267,9 @@ export function useRejectFriendRequest(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "pending", "received", userId] });
       const previous = queryClient.getQueryData(["friends", "pending", "received", userId]);
 
-      queryClient.setQueryData(["friends", "pending", "received", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          requests: (old.requests || []).filter((r: any) => r.id !== friendshipId),
-        };
+      queryClient.setQueryData(["friends", "pending", "received", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((r) => r.friendship_id !== friendshipId);
       });
 
       return { previous };
@@ -298,12 +295,9 @@ export function useCancelFriendRequest(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "pending", "sent", userId] });
       const previous = queryClient.getQueryData(["friends", "pending", "sent", userId]);
 
-      queryClient.setQueryData(["friends", "pending", "sent", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          requests: (old.requests || []).filter((r: any) => r.id !== friendshipId),
-        };
+      queryClient.setQueryData(["friends", "pending", "sent", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((r) => r.friendship_id !== friendshipId);
       });
 
       return { previous };
@@ -330,12 +324,9 @@ export function useRemoveFriend(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "list", userId] });
       const previous = queryClient.getQueryData(["friends", "list", userId]);
 
-      queryClient.setQueryData(["friends", "list", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          friends: (old.friends || []).filter((f: any) => f.id !== friendId),
-        };
+      queryClient.setQueryData(["friends", "list", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((f) => f.id !== friendId);
       });
 
       return { previous };
@@ -378,14 +369,11 @@ export function useAddCloseFriend(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "list", userId] });
       const previous = queryClient.getQueryData(["friends", "list", userId]);
 
-      queryClient.setQueryData(["friends", "list", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          friends: (old.friends || []).map((f: any) =>
-            f.id === friendId ? { ...f, is_close_friend: true } : f
-          ),
-        };
+      queryClient.setQueryData(["friends", "list", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((f) =>
+          f.id === friendId ? { ...f, is_close_friend: true } : f
+        );
       });
 
       return { previous };
@@ -413,14 +401,11 @@ export function useRemoveCloseFriend(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "list", userId] });
       const previous = queryClient.getQueryData(["friends", "list", userId]);
 
-      queryClient.setQueryData(["friends", "list", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          friends: (old.friends || []).map((f: any) =>
-            f.id === friendId ? { ...f, is_close_friend: false } : f
-          ),
-        };
+      queryClient.setQueryData(["friends", "list", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.map((f) =>
+          f.id === friendId ? { ...f, is_close_friend: false } : f
+        );
       });
 
       return { previous };
@@ -448,12 +433,18 @@ export function useFollow(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "following", userId] });
       const previous = queryClient.getQueryData(["friends", "following", userId]);
 
-      queryClient.setQueryData(["friends", "following", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          following: [...(old.following || []), { id: followingId, user_id: userId, following_id: followingId }],
-        };
+      queryClient.setQueryData(["friends", "following", userId], (old: FollowUser[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return [...old, {
+          id: followingId,
+          full_name: null,
+          username: null,
+          avatar_url: null,
+          bio: null,
+          is_verified: false,
+          is_friend: false,
+          mutual_friends_count: 0,
+        }];
       });
 
       return { previous };
@@ -480,12 +471,9 @@ export function useUnfollow(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "following", userId] });
       const previous = queryClient.getQueryData(["friends", "following", userId]);
 
-      queryClient.setQueryData(["friends", "following", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          following: (old.following || []).filter((f: any) => f.following_id !== followingId),
-        };
+      queryClient.setQueryData(["friends", "following", userId], (old: FollowUser[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((f) => f.id !== followingId);
       });
 
       return { previous };
@@ -512,12 +500,9 @@ export function useRemoveFollower(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "followers", userId] });
       const previous = queryClient.getQueryData(["friends", "followers", userId]);
 
-      queryClient.setQueryData(["friends", "followers", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          followers: (old.followers || []).filter((f: any) => f.follower_id !== followerId),
-        };
+      queryClient.setQueryData(["friends", "followers", userId], (old: FollowUser[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((f) => f.id !== followerId);
       });
 
       return { previous };
@@ -558,12 +543,9 @@ export function useAcceptFollowRequest(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "follow-requests", "received", userId] });
       const previous = queryClient.getQueryData(["friends", "follow-requests", "received", userId]);
 
-      queryClient.setQueryData(["friends", "follow-requests", "received", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          requests: (old.requests || []).filter((r: any) => r.id !== requestId),
-        };
+      queryClient.setQueryData(["friends", "follow-requests", "received", userId], (old: FollowRequestDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((r) => r.id !== requestId);
       });
 
       return { previous };
@@ -591,12 +573,9 @@ export function useRejectFollowRequest(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "follow-requests", "received", userId] });
       const previous = queryClient.getQueryData(["friends", "follow-requests", "received", userId]);
 
-      queryClient.setQueryData(["friends", "follow-requests", "received", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          requests: (old.requests || []).filter((r: any) => r.id !== requestId),
-        };
+      queryClient.setQueryData(["friends", "follow-requests", "received", userId], (old: FollowRequestDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((r) => r.id !== requestId);
       });
 
       return { previous };
@@ -622,12 +601,9 @@ export function useCancelFollowRequest(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "follow-requests", "sent", userId] });
       const previous = queryClient.getQueryData(["friends", "follow-requests", "sent", userId]);
 
-      queryClient.setQueryData(["friends", "follow-requests", "sent", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          requests: (old.requests || []).filter((r: any) => r.id !== requestId),
-        };
+      queryClient.setQueryData(["friends", "follow-requests", "sent", userId], (old: FollowRequestDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((r) => r.id !== requestId);
       });
 
       return { previous };
@@ -654,12 +630,9 @@ export function useBlockUser(userId: string) {
       await queryClient.cancelQueries({ queryKey: ["friends", "list", userId] });
       const previous = queryClient.getQueryData(["friends", "list", userId]);
 
-      queryClient.setQueryData(["friends", "list", userId], (old: any) => {
-        if (!old) return old;
-        return {
-          ...old,
-          friends: (old.friends || []).filter((f: any) => f.id !== blockedUserId),
-        };
+      queryClient.setQueryData(["friends", "list", userId], (old: FriendDetail[] | undefined) => {
+        if (!Array.isArray(old)) return old;
+        return old.filter((f) => f.id !== blockedUserId);
       });
 
       return { previous };

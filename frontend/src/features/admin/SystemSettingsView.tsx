@@ -111,7 +111,36 @@ export function SystemSettingsView() {
           <p className="mt-2 text-sm text-muted-foreground">No settings found.</p>
         </Card>
       ) : (
-        <Card>
+        <>
+          <div className="space-y-3 md:hidden">
+            {settings.map((s) => (
+              <Card key={s.id}>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="break-words font-mono text-xs font-medium">{s.key}</p>
+                      <p className="mt-0.5 break-words text-sm text-muted-foreground">{s.value}</p>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-xs">{s.category}</span>
+                  </div>
+                  {s.description && (
+                    <p className="break-words text-xs text-muted-foreground">{s.description}</p>
+                  )}
+                  <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(s)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"
+                      onClick={() => { if (confirm(`Delete setting "${s.key}"?`)) deleteMutation.mutate(s.key); }}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="hidden md:block">
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -148,7 +177,8 @@ export function SystemSettingsView() {
               </tbody>
             </table>
           </CardContent>
-        </Card>
+          </Card>
+        </>
       )}
     </div>
   );

@@ -23,6 +23,9 @@ from app.api.v1.ranking import router as ranking_router
 from app.api.v1.recommendations import router as recommendations_router
 from app.api.v1.feed_generator import router as feed_generator_router
 from app.api.v1.settings import router as settings_router
+from app.api.v1.learning import router as learning_router
+from app.api.v1.recommendation_analytics import router as recommendation_analytics_router
+from app.api.v1.system import router as system_router
 
 api_router = APIRouter()
 api_router.include_router(auth_router, prefix="/auth", tags=["Authentication"])
@@ -49,3 +52,6 @@ api_router.include_router(ranking_router, prefix="/ranking", tags=["Ranking"])
 api_router.include_router(recommendations_router, prefix="/recommendations", tags=["Recommendations"])
 api_router.include_router(feed_generator_router, prefix="/feed", tags=["Feed"])
 api_router.include_router(settings_router, prefix="", tags=["Settings"])
+api_router.include_router(learning_router, prefix="/learning", tags=["Learning Loop"])
+api_router.include_router(recommendation_analytics_router, prefix="/recommendation-analytics", tags=["Recommendation Analytics"])
+api_router.include_router(system_router, prefix="", tags=["System"])

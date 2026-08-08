@@ -207,7 +207,7 @@ export function SearchPage() {
                 className="rounded-3xl glass-card p-8 text-center transition-all duration-200"
               >
                 <Search className="mx-auto h-12 w-12 text-muted-foreground/40" />
-                <p className="mt-4 text-muted-foreground">
+                <p className="mt-4 break-words text-muted-foreground">
                   No results found for "{debouncedQuery}"
                 </p>
               </motion.div>

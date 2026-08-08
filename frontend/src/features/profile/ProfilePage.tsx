@@ -40,7 +40,6 @@ import {
   EditProfileModal,
   ProfileQRCode,
   ProfilePreview,
-  UsernameEditor,
   ProfilePostList,
   type PostCardHandlers,
 } from "./components";
@@ -301,7 +300,7 @@ export function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <div className="mx-auto max-w-5xl px-4 pb-8">
+      <div className="mx-auto w-full max-w-5xl px-4 pb-8 pt-14 md:pt-8">
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -349,7 +348,7 @@ export function ProfilePage() {
             }}
           />
 
-          <div className="flex flex-wrap items-center justify-end gap-2 px-1 pt-1 md:px-0 md:pt-0">
+          <div className="flex flex-wrap items-center justify-center gap-2 md:justify-end">
             {isOwn && (
               <>
                 <Button variant="outline" size="sm" className="rounded-full" onClick={() => setShowQRCode(!showQRCode)}>
@@ -438,9 +437,35 @@ export function ProfilePage() {
             )}
           </div>
 
+          {isOwn && friendCounts && (
+            <section className="rounded-2xl glass-card p-3 sm:p-5">
+              <h3 className="mb-3 text-sm font-bold text-muted-foreground">Connections</h3>
+              <div className="grid grid-cols-4 gap-1.5 sm:gap-2">
+                <div className="min-w-0 rounded-2xl bg-gradient-to-br from-primary/5 to-purple-500/5 px-1 py-2.5 text-center transition-all hover:shadow-card backdrop-blur-sm sm:px-2 sm:py-3">
+                  <p className="truncate text-lg font-bold sm:text-xl">{friendCounts.friends}</p>
+                  <p className="truncate text-[10px] text-muted-foreground sm:text-xs">Friends</p>
+                </div>
+                <div className="min-w-0 rounded-2xl bg-gradient-to-br from-pink-500/5 to-rose-500/5 px-1 py-2.5 text-center transition-all hover:shadow-card backdrop-blur-sm sm:px-2 sm:py-3">
+                  <p className="truncate text-lg font-bold sm:text-xl">{friendCounts.followers}</p>
+                  <p className="truncate text-[10px] text-muted-foreground sm:text-xs">Followers</p>
+                </div>
+                <div className="min-w-0 rounded-2xl bg-gradient-to-br from-blue-500/5 to-cyan-500/5 px-1 py-2.5 text-center transition-all hover:shadow-card backdrop-blur-sm sm:px-2 sm:py-3">
+                  <p className="truncate text-lg font-bold sm:text-xl">{friendCounts.following}</p>
+                  <p className="truncate text-[10px] text-muted-foreground sm:text-xs">Following</p>
+                </div>
+                <div className="min-w-0 rounded-2xl bg-gradient-to-br from-amber-500/5 to-orange-500/5 px-1 py-2.5 text-center transition-all hover:shadow-card backdrop-blur-sm sm:px-2 sm:py-3">
+                  <p className="truncate text-lg font-bold sm:text-xl">{friendCounts.close_friends}</p>
+                  <p className="truncate text-[10px] text-muted-foreground sm:text-xs">Close Friends</p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {showQRCode && isOwn && <ProfileQRCode profile={profile} />}
+
           <div className="grid gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-5">
-              <div role="tablist" aria-label="Profile sections" className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+            <div className={cn("min-w-0 space-y-5", !isOwn && mutualFriends.length > 0 ? "lg:col-span-2" : "lg:col-span-3")}>
+              <div role="tablist" aria-label="Profile sections" className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5">
                 {tabs.map((tab) => (
                   <Button
                     key={tab.key}
@@ -451,7 +476,7 @@ export function ProfilePage() {
                     size="sm"
                     onClick={() => selectTab(tab.key)}
                     className={cn(
-                      "gap-1.5 rounded-full px-4 text-sm font-medium whitespace-nowrap transition-all",
+                      "gap-1.5 rounded-full px-3 text-xs font-medium whitespace-nowrap transition-all sm:px-4 sm:text-sm",
                       activeTab === tab.key
                         ? "bg-primary text-primary-foreground shadow-sm"
                         : "text-muted-foreground hover:bg-muted"
@@ -476,7 +501,7 @@ export function ProfilePage() {
               )}
 
               {activeTab === "about" && (
-                <div className="rounded-2xl glass-card p-6">
+                <div className="rounded-2xl glass-card p-4 sm:p-6">
                   <h2 className="mb-4 text-lg font-semibold">About</h2>
                   <ProfileInfo profile={profile} />
                 </div>
@@ -484,7 +509,7 @@ export function ProfilePage() {
 
               {activeTab === "friends" && (
                 <div className="space-y-4">
-                  <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
                     {friendsTabs.map((tab) => (
                       <Button
                         key={tab.key}
@@ -863,33 +888,9 @@ export function ProfilePage() {
               )}
             </div>
 
-            <div className="space-y-5">
-              {isOwn && friendCounts && (
-                <div className="rounded-2xl glass-card p-6">
-                  <h3 className="mb-4 text-sm font-bold text-muted-foreground">Connections</h3>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-2xl bg-gradient-to-br from-primary/5 to-purple-500/5 p-3 text-center transition-all hover:shadow-card backdrop-blur-sm">
-                      <p className="text-xl font-bold">{friendCounts.friends}</p>
-                      <p className="text-xs text-muted-foreground">Friends</p>
-                    </div>
-                    <div className="rounded-2xl bg-gradient-to-br from-pink-500/5 to-rose-500/5 p-3 text-center transition-all hover:shadow-card backdrop-blur-sm">
-                      <p className="text-xl font-bold">{friendCounts.followers}</p>
-                      <p className="text-xs text-muted-foreground">Followers</p>
-                    </div>
-                    <div className="rounded-2xl bg-gradient-to-br from-blue-500/5 to-cyan-500/5 p-3 text-center transition-all hover:shadow-card backdrop-blur-sm">
-                      <p className="text-xl font-bold">{friendCounts.following}</p>
-                      <p className="text-xs text-muted-foreground">Following</p>
-                    </div>
-                    <div className="rounded-2xl bg-gradient-to-br from-amber-500/5 to-orange-500/5 p-3 text-center transition-all hover:shadow-card backdrop-blur-sm">
-                      <p className="text-xl font-bold">{friendCounts.close_friends}</p>
-                      <p className="text-xs text-muted-foreground">Close Friends</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {!isOwn && mutualFriends.length > 0 && (
-                <div className="rounded-2xl glass-card p-6">
+            {!isOwn && mutualFriends.length > 0 && (
+              <div className="space-y-5">
+                <div className="rounded-2xl glass-card p-4 sm:p-6">
                   <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-muted-foreground">
                     <Users className="h-4 w-4" />
                     Mutual Friends ({mutualFriends.length})
@@ -915,23 +916,8 @@ export function ProfilePage() {
                     ))}
                   </div>
                 </div>
-              )}
-
-              {isOwn && (
-                <div className="rounded-2xl glass-card p-6">
-                  <UsernameEditor
-                    currentUsername={profile.username}
-                    onSave={async (username: string) => {
-                      await updateProfile.mutateAsync({ username });
-                    }}
-                  />
-                </div>
-              )}
-
-              {showQRCode && isOwn && (
-                <ProfileQRCode profile={profile} />
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </motion.div>
       </div>

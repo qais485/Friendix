@@ -117,10 +117,10 @@ export function AdminPage() {
               className="space-y-6"
             >
               <div className="flex items-center gap-3 pt-12 md:pt-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 shadow-card">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-500/10 shadow-card">
                   <Shield className="h-6 w-6 text-red-500" />
                 </div>
-                <div>
+                <div className="min-w-0 flex-1">
                   <h1 className="text-2xl font-bold tracking-tight">Admin Dashboard</h1>
                   <p className="text-sm text-muted-foreground">Manage your platform</p>
                 </div>

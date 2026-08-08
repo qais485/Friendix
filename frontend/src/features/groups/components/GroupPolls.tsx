@@ -104,9 +104,9 @@ export function GroupPolls({ group }: GroupPollsProps) {
                       className="absolute inset-0 bg-primary/10 transition-all"
                       style={{ width: `${pct}%` }}
                     />
-                    <span className="relative flex items-center justify-between">
-                      <span>{opt}</span>
-                      <span className="text-xs text-muted-foreground font-medium">{pct}%</span>
+                    <span className="relative flex min-w-0 items-center justify-between gap-2">
+                      <span className="min-w-0 truncate">{opt}</span>
+                      <span className="shrink-0 text-xs text-muted-foreground font-medium">{pct}%</span>
                     </span>
                   </button>
                 );

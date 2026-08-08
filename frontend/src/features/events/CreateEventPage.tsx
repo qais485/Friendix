@@ -60,7 +60,7 @@ export function CreateEventPage() {
             </p>
           </div>
 
-          <div className="space-y-5 rounded-2xl glass-card p-6 shadow-card">
+          <div className="space-y-5 rounded-2xl glass-card p-4 sm:p-6 shadow-card">
             <div className="space-y-2">
               <label className="text-sm font-medium">Event Title *</label>
               <input
@@ -85,7 +85,7 @@ export function CreateEventPage() {
 
             <div className="space-y-2">
               <label className="text-sm font-medium">Event Type</label>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <button
                   onClick={() => setEventType("offline")}
                   className={`flex items-center justify-center gap-2 rounded-xl border p-4 text-sm font-medium transition-all duration-200 ${

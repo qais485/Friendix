@@ -70,7 +70,7 @@ export function AppLayout({ children, showRightSidebar = true }: AppLayoutProps)
         <div className="flex min-h-screen">
           <FloatingActions />
           <main
-            className={`min-h-screen flex-1 transition-[margin] duration-250 ease-in-out ${
+            className={`min-h-screen min-w-0 flex-1 transition-[margin] duration-250 ease-in-out ${
               isMobile
                 ? "ml-0 mb-16"
                 : sidebarCollapsed

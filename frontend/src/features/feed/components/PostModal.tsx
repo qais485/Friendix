@@ -737,7 +737,7 @@ export function PostModal({
                     variant="ghost"
                     size="sm"
                     className={cn(
-                      "h-9 gap-1.5 rounded-full px-3 text-sm",
+                      "h-9 gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 text-sm",
                       post.is_liked
                         ? "text-red-500 hover:text-red-600"
                         : "text-muted-foreground hover:text-red-500"
@@ -747,32 +747,32 @@ export function PostModal({
                     aria-label={post.is_liked ? "Unlike" : "Like"}
                   >
                     <Heart className={cn("h-5 w-5 transition-all", post.is_liked && "fill-current")} />
-                    {post.likes_count > 0 && <span className="font-medium">{post.likes_count}</span>}
+                    {post.likes_count > 0 && <span className="hidden font-medium sm:inline">{post.likes_count}</span>}
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 gap-1.5 rounded-full px-3 text-sm text-muted-foreground hover:text-primary"
+                    className="h-9 gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 text-sm text-muted-foreground hover:text-primary"
                     aria-label="Comments"
                   >
                     <MessageCircle className="h-5 w-5" />
-                    {post.comments_count > 0 && <span className="font-medium">{post.comments_count}</span>}
+                    {post.comments_count > 0 && <span className="hidden font-medium sm:inline">{post.comments_count}</span>}
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 gap-1.5 rounded-full px-3 text-sm text-muted-foreground hover:text-green-500"
+                    className="h-9 gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 text-sm text-muted-foreground hover:text-green-500"
                     onClick={() => onRepost?.(post.id)}
                     disabled={isAnyFeedMutationPending}
                     aria-label="Repost"
                   >
                     <Repeat2 className="h-5 w-5" />
-                    {post.repost_count > 0 && <span className="font-medium">{post.repost_count}</span>}
+                    {post.repost_count > 0 && <span className="hidden font-medium sm:inline">{post.repost_count}</span>}
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 gap-1.5 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
+                    className="h-9 gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 text-sm text-muted-foreground hover:text-foreground"
                     onClick={() => onQuote?.(post.id)}
                     aria-label="Quote post"
                   >
@@ -781,7 +781,7 @@ export function PostModal({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 gap-1.5 rounded-full px-3 text-sm text-muted-foreground hover:text-foreground"
+                    className="h-9 gap-1 sm:gap-1.5 rounded-full px-2 sm:px-3 text-sm text-muted-foreground hover:text-foreground"
                     onClick={handleShare}
                     aria-label="Share post"
                   >
@@ -791,7 +791,7 @@ export function PostModal({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-9 rounded-full p-2"
+                    className="h-9 rounded-full p-1.5 sm:p-2"
                     onClick={() => post.is_saved ? onUnsave?.(post.id) : onSave?.(post.id)}
                     disabled={isAnyFeedMutationPending}
                     aria-label={post.is_saved ? "Unsave post" : "Save post"}

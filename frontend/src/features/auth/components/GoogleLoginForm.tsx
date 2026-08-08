@@ -34,6 +34,38 @@ export function GoogleLoginForm() {
   const googleButtonRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState("");
   const [scriptLoaded, setScriptLoaded] = useState(false);
+  const [buttonWidth, setButtonWidth] = useState(300);
+  const buttonWidthRef = useRef(300);
+
+  const renderGoogleButton = () => {
+    if (!window.google || !googleButtonRef.current) return;
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: "outline",
+      size: "large",
+      width: buttonWidthRef.current,
+      text: "continue_with",
+    });
+  };
+
+  useEffect(() => {
+    const measure = () => {
+      const el = googleButtonRef.current;
+      if (!el) return;
+      const w = el.parentElement ? el.parentElement.clientWidth : 300;
+      const next = Math.max(200, Math.min(300, w));
+      buttonWidthRef.current = next;
+      setButtonWidth(next);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    const parent = googleButtonRef.current?.parentElement;
+    if (parent) ro.observe(parent);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    renderGoogleButton();
+  }, [buttonWidth]);
 
   const handleGoogleResponse = async (response: { credential: string }) => {
     setError("");
@@ -60,12 +92,7 @@ export function GoogleLoginForm() {
           callback: handleGoogleResponse,
         });
         if (googleButtonRef.current) {
-          window.google.accounts.id.renderButton(googleButtonRef.current, {
-            theme: "outline",
-            size: "large",
-            width: 300,
-            text: "continue_with",
-          });
+          renderGoogleButton();
         }
         setScriptLoaded(true);
       }
@@ -83,12 +110,7 @@ export function GoogleLoginForm() {
           callback: handleGoogleResponse,
         });
         if (googleButtonRef.current) {
-          window.google.accounts.id.renderButton(googleButtonRef.current, {
-            theme: "outline",
-            size: "large",
-            width: 300,
-            text: "continue_with",
-          });
+          renderGoogleButton();
         }
         setScriptLoaded(true);
       }
@@ -158,15 +180,15 @@ export function GoogleLoginForm() {
 
           <div className="flex flex-col items-center space-y-4">
             {isLoading ? (
-              <div className="flex items-center justify-center h-[44px] w-[300px]">
+              <div className="flex items-center justify-center h-[44px] w-full max-w-[300px]">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             ) : (
-              <div ref={googleButtonRef} />
+              <div ref={googleButtonRef} className="w-full max-w-[300px]" />
             )}
 
             {!scriptLoaded && !isLoading && !error && (
-              <div className="flex items-center justify-center h-[44px] w-[300px]">
+              <div className="flex items-center justify-center h-[44px] w-full max-w-[300px]">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
             )}

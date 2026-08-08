@@ -39,7 +39,7 @@ export function VideosPage() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          <div className="flex items-center justify-between pt-12 md:pt-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-12 md:pt-0">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 shadow-card">
                 <PlayCircle className="h-5 w-5 text-primary" />
@@ -49,7 +49,7 @@ export function VideosPage() {
                 <p className="text-sm text-muted-foreground">Watch, discover, and share</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Link to="/videos/history">
                 <Button variant="outline" size="sm" className="gap-1.5 rounded-xl transition-all duration-200 hover:shadow-card">
                   <Clock className="h-4 w-4" />

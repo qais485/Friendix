@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { useVideoComments, useCreateVideoComment, useDeleteVideoComment, useVideoCommentReplies } from "../hooks";
 import { useAuthStore } from "@/store/authStore";
+import { tracking } from "@/services/tracking";
 import type { VideoComment } from "@/types/videos";
 
 interface VideoCommentsProps {
@@ -26,7 +27,7 @@ function CommentItem({ comment, videoId, currentUserId, onDelete }: {
     if (!replyText.trim()) return;
     createReply.mutate(
       { videoId, data: { content: replyText.trim(), parent_id: comment.id } },
-      { onSuccess: () => { setReplyText(""); setShowReplies(true); } }
+      { onSuccess: () => { tracking.comment({ content_type: "video", content_id: videoId, context: "reply" }); setReplyText(""); setShowReplies(true); } }
     );
   };
 
@@ -47,10 +48,10 @@ function CommentItem({ comment, videoId, currentUserId, onDelete }: {
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">{comment.user?.full_name || comment.user?.username || "Unknown"}</span>
-            <span className="text-xs text-muted-foreground">{timeAgo(comment.created_at)}</span>
+            <span className="min-w-0 truncate text-sm font-medium">{comment.user?.full_name || comment.user?.username || "Unknown"}</span>
+            <span className="shrink-0 text-xs text-muted-foreground">{timeAgo(comment.created_at)}</span>
           </div>
-          <p className="mt-0.5 text-sm">{comment.content}</p>
+          <p className="mt-0.5 break-words text-sm">{comment.content}</p>
           <div className="mt-1 flex items-center gap-3">
             {comment.replies_count > 0 && (
               <button
@@ -93,11 +94,11 @@ function CommentItem({ comment, videoId, currentUserId, onDelete }: {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium">{reply.user?.full_name || reply.user?.username}</span>
-                    <span className="text-[10px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
-                  </div>
-                  <p className="mt-0.5 text-xs">{reply.content}</p>
+                <div className="flex items-center gap-2">
+                  <span className="min-w-0 truncate text-xs font-medium">{reply.user?.full_name || reply.user?.username}</span>
+                  <span className="shrink-0 text-[10px] text-muted-foreground">{timeAgo(reply.created_at)}</span>
+                </div>
+                <p className="mt-0.5 break-words text-xs">{reply.content}</p>
                 </div>
               </div>
             ))}
@@ -146,7 +147,7 @@ export function VideoComments({ videoId }: VideoCommentsProps) {
     if (!commentText.trim()) return;
     createComment.mutate(
       { videoId, data: { content: commentText.trim() } },
-      { onSuccess: () => setCommentText("") }
+      { onSuccess: () => { tracking.comment({ content_type: "video", content_id: videoId, context: "comment" }); setCommentText(""); } }
     );
   };
 

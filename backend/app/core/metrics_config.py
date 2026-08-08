@@ -39,10 +39,10 @@ DEFAULT_POPULARITY_WEIGHTS: dict[str, float] = {
 
 DEFAULT_QUALITY_WEIGHTS: dict[str, float] = {
     "title": 0.30,
-    "media": 0.25,
-    "category": 0.20,
-    "tags": 0.15,
-    "topics": 0.10,
+    "media": 0.15,
+    "category": 0.15,
+    "tags": 0.20,
+    "topics": 0.20,
 }
 
 

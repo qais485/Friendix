@@ -56,7 +56,7 @@ export function LiveDonations({ streamId, allowDonations }: LiveDonationsProps) 
 
       {allowDonations ? (
         <form onSubmit={handleDonate} className="p-3 space-y-3">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {[1, 5, 10, 25, 50, 100].map((preset) => (
               <button
                 key={preset}
@@ -119,12 +119,12 @@ export function LiveDonations({ streamId, allowDonations }: LiveDonationsProps) 
         <div className="border-t border-gray-700 p-3 space-y-2 max-h-48 overflow-y-auto">
           {donations.map((donation: LiveDonation) => (
             <div key={donation.id} className="flex items-center gap-2 text-sm">
-              <span className="text-green-400 font-medium">${donation.amount}</span>
-              <span className="text-gray-300">
+              <span className="shrink-0 text-green-400 font-medium">${donation.amount}</span>
+              <span className="shrink-0 text-gray-300">
                 {donation.is_anonymous ? "Anonymous" : donation.user?.username || "User"}
               </span>
               {donation.message && (
-                <span className="text-gray-500 truncate">- {donation.message}</span>
+                <span className="min-w-0 truncate text-gray-500">- {donation.message}</span>
               )}
             </div>
           ))}

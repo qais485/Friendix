@@ -120,7 +120,7 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
         <div className="relative">
           {showActions && (
             <div
-              className={`absolute top-0 z-10 flex items-center gap-0.5 rounded-full border bg-background shadow-md ${
+              className={`absolute top-0 z-10 flex max-w-[calc(100vw-2rem)] flex-wrap items-center gap-0.5 rounded-full border bg-background shadow-md ${
                 isOwn ? "-left-16" : "-right-16"
               }`}
             >
@@ -167,7 +167,7 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
 
           {showReactionPicker && (
             <div
-              className={`absolute -top-10 z-20 flex gap-1 rounded-full border bg-background px-2 py-1 shadow-lg ${
+              className={`absolute -top-10 z-20 flex max-w-[calc(100vw-2rem)] flex-wrap justify-center gap-1 rounded-full border bg-background px-2 py-1 shadow-lg ${
                 isOwn ? "right-0" : "left-0"
               }`}
             >
@@ -208,7 +208,7 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
                   src={message.media_url}
                   alt="Shared image"
                   preset="feed"
-                  className="max-h-60 rounded-lg object-cover cursor-pointer"
+                  className="max-h-60 w-full max-w-full rounded-lg object-cover cursor-pointer"
                   onClick={() => setLightboxOpen(true)}
                 />
                 <button
@@ -229,19 +229,17 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
                 poster={getVideoPosterUrl(message.media_url)}
                 controls
                 preload="metadata"
-                width={320}
-                height={240}
-                className="mb-1 max-h-60 rounded-lg"
+                className="mb-1 max-h-60 w-full max-w-full rounded-lg"
               />
             )}
 
             {message.message_type === "audio" && message.media_url && (
-              <audio src={message.media_url} controls preload="metadata" className="mb-1 w-48" />
+              <audio src={message.media_url} controls preload="metadata" className="mb-1 w-full max-w-[240px]" />
             )}
 
             {message.message_type === "voice" && message.media_url && (
               <div className="flex items-center gap-2">
-                <audio src={message.media_url} controls preload="metadata" className="w-48" />
+                <audio src={message.media_url} controls preload="metadata" className="w-40 sm:w-48" />
                 {message.duration && (
                   <span className="text-xs opacity-70">{message.duration}s</span>
                 )}
@@ -252,11 +250,11 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
               <a
                 href={message.media_url || "#"}
                 download={message.file_name}
-                className="flex items-center gap-2 underline"
+                className="flex min-w-0 max-w-full items-center gap-2 underline"
               >
-                <span className="truncate">{message.file_name || "File"}</span>
+                <span className="min-w-0 truncate">{message.file_name || "File"}</span>
                 {message.file_size && (
-                  <span className="text-xs opacity-70">
+                  <span className="shrink-0 text-xs opacity-70">
                     ({(message.file_size / 1024).toFixed(1)} KB)
                   </span>
                 )}
@@ -268,7 +266,7 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
                 src={message.media_url}
                 alt="GIF"
                 preset="full"
-                className="mb-1 max-h-48 rounded-lg"
+                className="mb-1 max-h-48 w-full max-w-full rounded-lg"
               />
             )}
 
@@ -288,7 +286,7 @@ export function MessageBubble({ message, isOwn, showSender, onReply, onReact, on
                 onChange={(e) => setEditContent(e.target.value)}
                 onKeyDown={handleEditKeyDown}
                 onBlur={handleEditSubmit}
-                className="min-w-[200px] bg-transparent border-b border-current outline-none"
+                className="min-w-[200px] max-w-full bg-transparent border-b border-current outline-none"
               />
             ) : (
               message.content && (

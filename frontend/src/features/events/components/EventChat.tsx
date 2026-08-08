@@ -47,7 +47,7 @@ export function EventChat({ event }: EventChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-[400px]">
+    <div className="flex flex-col h-[320px] sm:h-[400px]">
       <div className="flex-1 overflow-y-auto space-y-3 p-4">
         {!messages || messages.length === 0 ? (
           <div className="flex h-full items-center justify-center">
@@ -80,12 +80,12 @@ export function EventChat({ event }: EventChatProps) {
               )}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{msg.username}</span>
-                  <span className="text-[10px] text-muted-foreground">
+                  <span className="min-w-0 truncate text-sm font-medium">{msg.username}</span>
+                  <span className="shrink-0 text-[10px] text-muted-foreground">
                     {formatDistanceToNow(new Date(msg.created_at))}
                   </span>
                 </div>
-                <p className="mt-0.5 text-sm whitespace-pre-wrap">{msg.content}</p>
+                <p className="mt-0.5 break-words text-sm whitespace-pre-wrap">{msg.content}</p>
               </div>
             </motion.div>
           ))

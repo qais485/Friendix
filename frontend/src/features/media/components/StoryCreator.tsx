@@ -93,7 +93,7 @@ export function StoryCreator({
 
         <h2 className="mb-4 text-xl font-bold">Create Story</h2>
 
-        <div className="mb-4 flex gap-2">
+        <div className="mb-4 flex flex-wrap gap-2">
           <Button
             variant={mode === "media" ? "default" : "outline"}
             size="sm"

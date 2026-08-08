@@ -4,6 +4,8 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from app.core.cache import cache_key, content_set_key, get_application_cache
+from app.core.cache_config import get_cache_config
 from app.models import ContentEvent, ContentProfile, Follow, Report
 
 # View-ish event types that count as "the user has seen this".
@@ -17,6 +19,8 @@ class RulesRepository:
 
     def __init__(self, db: Session):
         self.db = db
+        self._cache = get_application_cache()
+        self._cache_cfg = get_cache_config()
 
     def get_followed_creator_ids(self, user_id: UUID) -> set[UUID]:
         rows = self.db.execute(
@@ -47,6 +51,10 @@ class RulesRepository:
     ) -> dict[UUID, int]:
         if not content_ids:
             return {}
+        key = cache_key("reported", content_set_key(content_ids), ",".join(sorted(content_types)))
+        cached = self._cache.get(key)
+        if cached is not None:
+            return {UUID(k): v for k, v in cached.items()}
         rows = self.db.execute(
             select(Report.entity_id, func.count(Report.id).label("n"))
             .where(
@@ -56,7 +64,16 @@ class RulesRepository:
             )
             .group_by(Report.entity_id)
         ).all()
-        return {entity_id: n for entity_id, n in rows}
+        result = {entity_id: n for entity_id, n in rows}
+        try:
+            self._cache.set(
+                key,
+                {str(k): v for k, v in result.items()},
+                ttl_seconds=self._cache_cfg.REPORTED_TTL_SECONDS,
+            )
+        except Exception:
+            pass
+        return result
 
     def get_profiles(self, keys: list[tuple[str, UUID]]) -> dict[tuple[str, UUID], ContentProfile]:
         """Load content profiles for a list of (content_type, content_id) keys."""

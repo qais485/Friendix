@@ -50,7 +50,7 @@ export function AdvancedFilters({
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="absolute right-0 top-full z-50 mt-2 w-72 rounded-3xl glass-card p-4 shadow-float"
+            className="absolute right-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-3xl glass-card p-4 shadow-float"
           >
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-semibold">Filters</h3>

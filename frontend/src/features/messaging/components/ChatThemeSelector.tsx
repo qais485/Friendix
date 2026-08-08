@@ -37,7 +37,7 @@ export function ChatThemeSelector({ conversationId, currentTheme, onClose }: Cha
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         onClick={onClose}
       >
         <motion.div
@@ -45,7 +45,7 @@ export function ChatThemeSelector({ conversationId, currentTheme, onClose }: Cha
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
           onClick={(e) => e.stopPropagation()}
-          className="w-full max-w-sm rounded-2xl border bg-background p-6 shadow-xl"
+          className="w-full max-w-sm rounded-2xl border bg-background p-4 shadow-xl sm:p-6"
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-lg font-semibold">Chat Theme</h3>
@@ -54,20 +54,20 @@ export function ChatThemeSelector({ conversationId, currentTheme, onClose }: Cha
             </button>
           </div>
 
-          <div className="mb-4 grid grid-cols-4 gap-3">
+          <div className="mb-4 grid grid-cols-4 gap-2 sm:gap-3">
             {THEMES.map((theme) => (
               <button
                 key={theme.id}
                 onClick={() => setSelected(theme.id)}
-                className={`relative flex flex-col items-center gap-1.5 rounded-xl border-2 p-3 transition-all ${
+                className={`relative flex flex-col items-center gap-1.5 rounded-xl border-2 p-2 transition-all sm:p-3 ${
                   selected === theme.id
                     ? "border-primary"
                     : "border-transparent hover:border-muted-foreground/20"
                 }`}
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full" style={{ backgroundColor: theme.preview }}>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full sm:h-10 sm:w-10" style={{ backgroundColor: theme.preview }}>
                   {selected === theme.id && (
-                    <Check className="h-5 w-5 text-white" />
+                    <Check className="h-4 w-4 text-white sm:h-5 sm:w-5" />
                   )}
                 </div>
                 <span className="text-xs text-muted-foreground">{theme.name}</span>

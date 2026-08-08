@@ -211,49 +211,50 @@ export function CreatePostForm({
             transition={{ duration: 0.2 }}
           >
             {/* Background Mode - Facebook Style */}
-            <div
-              className={cn("relative flex flex-col items-center justify-center p-8", previewAspectClass)}
+              <div className={cn("relative flex flex-col items-center justify-center p-6 sm:p-8", previewAspectClass)}
               style={bgStyle.style}
             >
               {/* Top bar */}
-              <div className="absolute left-0 right-0 top-0 flex items-center justify-between px-4 pt-3">
-                <div className="flex items-center gap-3">
+              <div className="absolute left-0 right-0 top-0 flex items-center justify-between gap-2 px-4 pt-3">
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   {userAvatar ? (
                     <OptimizedImage
                       src={userAvatar}
                       alt={userName || "User"}
                       preset="avatar"
                       eager
-                      className="h-9 w-9 rounded-full object-cover ring-2 ring-white/30"
+                      className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white/30"
                     />
                   ) : (
-                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white ring-2 ring-white/30">
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-sm font-semibold text-white ring-2 ring-white/30">
                       {userName?.charAt(0) || "U"}
                     </div>
                   )}
-                  <span className="text-sm font-semibold text-white drop-shadow">{userName || "User"}</span>
+                  <span className="truncate text-sm font-semibold text-white drop-shadow">{userName || "User"}</span>
                 </div>
-                <BackgroundPicker
-                  value={bgValue}
-                  customColor={bgCustomColor}
-                  backgroundImageUrl={bgImageUrl}
-                  onChange={setBgValue}
-                  onCustomColorChange={setBgCustomColor}
-                  onBackgroundImageChange={setBgImageUrl}
-                />
-                {isBackgroundMode && (
-                  <select
-                    value={aspectRatio}
-                    onChange={(e) => setAspectRatio(e.target.value)}
-                    className="flex h-7 items-center rounded-full border border-white/20 bg-white/10 px-2 text-[10px] text-white outline-none backdrop-blur-sm"
-                    aria-label="Aspect ratio"
-                  >
-                    <option value="4:5">4:5</option>
-                    <option value="16:9">16:9</option>
-                    <option value="1:1">1:1</option>
-                    <option value="9:16">9:16</option>
-                  </select>
-                )}
+                <div className="flex shrink-0 items-center gap-1.5">
+                  <BackgroundPicker
+                    value={bgValue}
+                    customColor={bgCustomColor}
+                    backgroundImageUrl={bgImageUrl}
+                    onChange={setBgValue}
+                    onCustomColorChange={setBgCustomColor}
+                    onBackgroundImageChange={setBgImageUrl}
+                  />
+                  {isBackgroundMode && (
+                    <select
+                      value={aspectRatio}
+                      onChange={(e) => setAspectRatio(e.target.value)}
+                      className="flex h-7 items-center rounded-full border border-white/20 bg-white/10 px-2 text-[10px] text-white outline-none backdrop-blur-sm"
+                      aria-label="Aspect ratio"
+                    >
+                      <option value="4:5">4:5</option>
+                      <option value="16:9">16:9</option>
+                      <option value="1:1">1:1</option>
+                      <option value="9:16">9:16</option>
+                    </select>
+                  )}
+                </div>
               </div>
 
               {/* Centered text */}
@@ -267,7 +268,7 @@ export function CreatePostForm({
               </div>
 
               {/* Bottom bar */}
-              <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between px-4 pb-3 pt-8">
+              <div className="absolute bottom-0 left-0 right-0 flex flex-wrap items-center justify-between gap-2 px-4 pb-3 pt-8">
                 <div className="flex items-center gap-1">
                   <Button
                     variant="ghost"

@@ -45,7 +45,7 @@ export function StoryHighlights({ userId, onSelectHighlight }: StoryHighlightsPr
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-bold">Story Highlights</h3>
         <Button size="sm" onClick={() => setShowCreate(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -140,7 +140,7 @@ export function StoryHighlights({ userId, onSelectHighlight }: StoryHighlightsPr
                   {highlight.title}
                 </p>
               </div>
-              <div className="absolute right-1 top-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute right-1 top-1 flex gap-1 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

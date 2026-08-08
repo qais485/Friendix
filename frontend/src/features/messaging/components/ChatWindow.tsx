@@ -163,7 +163,7 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
 
       <ChatHeader conversation={conversation} onBack={onBack} />
 
-      <div ref={containerRef} className="flex-1 overflow-y-auto px-4 py-3 scrollbar-thin">
+      <div ref={containerRef} className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin sm:px-4">
         {isLoading ? (
           <div className="flex h-full items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -237,13 +237,13 @@ export function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-md rounded-3xl glass-card p-4 shadow-float"
+              className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl glass-card p-4 shadow-float"
             >
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-lg font-bold">Forward Message</h3>

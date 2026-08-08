@@ -151,7 +151,7 @@ function GroupMemberItem({
       </div>
 
       {!isSelf && relationship && (
-        <div className="flex items-center gap-1">
+        <div className="flex shrink-0 items-center gap-1">
           {!relationship.are_friends && !relationship.are_blocked && !relationship.is_following && (
             <Button
               variant="ghost"
@@ -182,7 +182,7 @@ function GroupMemberItem({
       )}
 
       {canManage && member.user_id !== groupId && (
-        <div className="relative">
+        <div className="relative shrink-0">
           <Button
             variant="ghost"
             size="sm"
@@ -192,7 +192,7 @@ function GroupMemberItem({
             <MoreHorizontal className="h-4 w-4" />
           </Button>
           {openMenu === member.id && (
-            <div className="absolute right-0 top-full z-10 mt-1 w-40 rounded-2xl glass-card p-1.5">
+            <div className="absolute right-0 top-full z-10 mt-1 w-40 max-w-[calc(100vw-2rem)] rounded-2xl glass-card p-1.5">
               {member.role !== "admin" && (
                 <button
                   onClick={() => {

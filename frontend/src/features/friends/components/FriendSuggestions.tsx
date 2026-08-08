@@ -57,11 +57,11 @@ export function FriendSuggestions({ suggestions, isLoading, onAddFriend, isProce
                 size="md"
                 showRing={false}
               />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
                   <p className="truncate text-sm font-semibold">{suggestion.full_name || "Unknown User"}</p>
                   {suggestion.is_verified && (
-                    <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">✓</span>
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-blue-500 text-[10px] text-white">✓</span>
                   )}
                 </div>
                 {suggestion.username && <p className="truncate text-xs text-muted-foreground">@{suggestion.username}</p>}
@@ -72,7 +72,7 @@ export function FriendSuggestions({ suggestions, isLoading, onAddFriend, isProce
                 )}
               </div>
             </div>
-            <Button size="sm" className="rounded-xl transition-all duration-200 hover:shadow-card" onClick={() => onAddFriend?.(suggestion.id)} disabled={isProcessing}>
+            <Button size="sm" className="shrink-0 rounded-xl transition-all duration-200 hover:shadow-card" onClick={() => onAddFriend?.(suggestion.id)} disabled={isProcessing}>
               {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <><UserPlus className="mr-1.5 h-4 w-4" /> Add</>}
             </Button>
           </motion.div>

@@ -65,7 +65,7 @@ export function FeatureFlagsManagement() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="font-semibold">Feature Flags</h3>
         <Button size="sm" onClick={() => { resetForm(); setShowForm(!showForm); }}>
           <Plus className="mr-1.5 h-4 w-4" /> New Flag
@@ -114,12 +114,12 @@ export function FeatureFlagsManagement() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-medium truncate">{flag.name}</p>
-                    <code className="rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{flag.key}</code>
+                    <code className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-xs text-muted-foreground">{flag.key}</code>
                   </div>
                   {flag.description && <p className="mt-0.5 text-xs text-muted-foreground truncate">{flag.description}</p>}
                   <p className="mt-0.5 text-xs text-muted-foreground">Rollout: {flag.rollout_percentage}%</p>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex shrink-0 items-center gap-1">
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => startEdit(flag)}>
                     <Pencil className="h-4 w-4" />
                   </Button>

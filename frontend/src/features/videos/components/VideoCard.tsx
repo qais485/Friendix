@@ -97,12 +97,12 @@ export function VideoCard({ video, index = 0, showOwnerMenu = false, onDelete }:
         )}
         <div className="flex-1 min-w-0">
           <Link to={`/watch/${video.id}`}>
-            <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{video.title}</h3>
+            <h3 className="line-clamp-2 break-words text-sm font-semibold leading-snug">{video.title}</h3>
           </Link>
           <p className="mt-1 text-xs text-muted-foreground">
             {video.user?.full_name || video.user?.username || "Unknown"}
           </p>
-          <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Eye className="h-3 w-3" />
               {formatViews(video.views_count)} views
@@ -122,7 +122,7 @@ export function VideoCard({ video, index = 0, showOwnerMenu = false, onDelete }:
               <MoreVertical className="h-4 w-4" />
             </Button>
             {menuOpen && (
-              <div className="absolute right-0 top-8 z-10 w-40 rounded-2xl glass-card p-1.5">
+              <div className="absolute right-0 top-8 z-10 w-40 max-w-[calc(100vw-2rem)] rounded-2xl glass-card p-1.5">
                 <Link
                   to={`/watch/${video.id}`}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm hover:bg-muted"

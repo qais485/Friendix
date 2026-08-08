@@ -33,6 +33,7 @@ import {
   useBlockUser,
 } from "@/features/friends/hooks";
 import { useToast } from "@/hooks/useToast";
+import { tracking } from "@/services/tracking";
 import { StoryReactions } from "./StoryReactions";
 import { StoryReplyInput } from "./StoryReplyInput";
 import type { Story } from "@/types";
@@ -116,6 +117,12 @@ export function StoryViewer({
   useEffect(() => {
     if (currentStory) {
       viewStory.mutate(currentStory.id);
+      tracking.viewStart({
+        content_type: "story",
+        content_id: currentStory.id,
+        creator_id: currentStory.user_id,
+        context: "story_viewer",
+      });
     }
   }, [currentStory?.id]);
 
@@ -380,7 +387,7 @@ export function StoryViewer({
 
           {/* Non-owner relationship actions */}
           {!isOwner && relationship && (
-            <div className="absolute right-14 top-3 z-20 flex items-center gap-2">
+            <div className="absolute right-14 top-3 z-20 flex flex-wrap items-center justify-end gap-2">
               {!relationship.are_friends && !relationship.are_blocked && (
                 <Button
                   variant="ghost"
@@ -403,11 +410,19 @@ export function StoryViewer({
                   variant="ghost"
                   size="sm"
                   className="text-white hover:bg-white/20 gap-1.5"
-                  onClick={() =>
+                  onClick={() => {
+                    if (currentStory) {
+                      tracking.follow({
+                        content_type: "story",
+                        content_id: currentStory.id,
+                        creator_id: currentStory.user_id,
+                        context: "story_viewer",
+                      });
+                    }
                     followUser.mutate(storyAuthorId, {
                       onSuccess: () => toast({ title: "Following" }),
-                    })
-                  }
+                    });
+                  }}
                   disabled={followUser.isPending}
                 >
                   <UserCheck className="h-4 w-4" />
@@ -432,7 +447,7 @@ export function StoryViewer({
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute left-3 top-14 z-30 w-64 rounded-xl bg-background p-3 shadow-xl"
+              className="absolute left-3 top-14 z-30 w-64 max-w-[calc(100vw-2rem)] rounded-xl bg-background p-3 shadow-xl"
               onClick={(e) => e.stopPropagation()}
             >
               <p className="mb-2 text-sm font-semibold">Add to Highlight</p>
@@ -530,7 +545,7 @@ export function StoryViewer({
                 </div>
               )}
               <div>
-                <p className="text-sm font-semibold text-white">
+                <p className="max-w-[40vw] truncate text-sm font-semibold text-white">
                   {currentStory.user?.full_name || "Unknown"}
                 </p>
                 <p className="text-[11px] text-white/70">
@@ -619,7 +634,7 @@ export function StoryViewer({
                         currentStory.background_color || "#1a1a2e",
                     }}
                   >
-                    <p className="text-2xl font-bold text-white">
+                    <p className="break-words text-2xl font-bold text-white">
                       {currentStory.content}
                     </p>
                   </div>

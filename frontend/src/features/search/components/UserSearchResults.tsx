@@ -39,7 +39,7 @@ function UserSearchResultCard({ user: searchUser, currentUserId, toast }: { user
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
     >
-      <div className="flex items-center gap-3 rounded-2xl glass-card p-4 transition-colors hover:bg-muted/50">
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl glass-card p-4 transition-colors hover:bg-muted/50">
         <Link to={`/profile/${searchUser.username}`} className="flex items-center gap-3 flex-1 min-w-0">
           {searchUser.avatar_url ? (
             <img

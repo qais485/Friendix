@@ -59,7 +59,50 @@ export function BannedUsersManagement() {
           <p className="mt-2 text-sm text-muted-foreground">No banned users.</p>
         </Card>
       ) : (
-        <Card>
+        <>
+          <div className="space-y-3 md:hidden">
+            {users.map((banned) => (
+              <Card key={banned.id}>
+                <CardContent className="space-y-3 p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-medium">{banned.full_name || "—"}</p>
+                        <p className="truncate text-xs text-muted-foreground">@{banned.username || "—"}</p>
+                      </div>
+                    </div>
+                    <span className={cn(
+                      "inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-xs font-medium",
+                      banned.is_permanent ? "bg-red-500/10 text-red-600" : "bg-yellow-500/10 text-yellow-600"
+                    )}>
+                      {banned.is_permanent ? "Permanent" : "Temporary"}
+                    </span>
+                  </div>
+                  <p className="break-words text-sm text-muted-foreground">{banned.reason}</p>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground">
+                    <span>Banned by {banned.banned_by_id ? "Admin" : "—"}</span>
+                    <span>Expires: {formatExpiry(banned)}</span>
+                  </div>
+                  <div className="flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-muted-foreground hover:text-foreground"
+                      onClick={() => { if (confirm(`Unban @${banned.username}?`)) unbanMutation.mutate(banned.id); }}
+                    >
+                      <ShieldOff className="h-4 w-4" />
+                      Unban
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <Card className="hidden md:block">
           <CardContent className="p-0 overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
@@ -113,7 +156,8 @@ export function BannedUsersManagement() {
               </tbody>
             </table>
           </CardContent>
-        </Card>
+          </Card>
+        </>
       )}
 
       {users.length >= 20 && (

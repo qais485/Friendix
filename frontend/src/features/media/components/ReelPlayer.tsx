@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { tracking } from "@/services/tracking";
 
 import type { Reel } from "@/types";
 
@@ -45,6 +46,7 @@ export function ReelPlayer({
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const impressionSentRef = useRef(false);
 
   const togglePlay = () => {
     if (videoRef.current) {
@@ -64,6 +66,25 @@ export function ReelPlayer({
     }
   };
 
+  const lastWatchRef = useRef(0);
+
+  const handleTimeUpdate = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    const t = v.currentTime;
+    if (t - lastWatchRef.current >= 10) {
+      lastWatchRef.current = t;
+      tracking.watchTime({
+        content_type: "reel",
+        content_id: reel.id,
+        creator_id: reel.user_id,
+        value: Math.round(t),
+        position_seconds: Math.round(t),
+        context: "reel",
+      });
+    }
+  };
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -72,6 +93,21 @@ export function ReelPlayer({
             if (entry.isIntersecting) {
               videoRef.current.play().catch(() => {});
               setIsPlaying(true);
+              if (!impressionSentRef.current) {
+                impressionSentRef.current = true;
+                tracking.impression({
+                  content_type: "reel",
+                  content_id: reel.id,
+                  creator_id: reel.user_id,
+                  context: "feed",
+                });
+                tracking.viewStart({
+                  content_type: "reel",
+                  content_id: reel.id,
+                  creator_id: reel.user_id,
+                  context: "feed",
+                });
+              }
             } else {
               videoRef.current.pause();
               setIsPlaying(false);
@@ -87,6 +123,7 @@ export function ReelPlayer({
     }
 
     return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const formatCount = (count: number) => {
@@ -111,6 +148,7 @@ export function ReelPlayer({
           playsInline
           preload="auto"
           onClick={togglePlay}
+          onTimeUpdate={handleTimeUpdate}
         />
 
         <div className="absolute inset-0 flex items-center justify-center">
@@ -177,6 +215,7 @@ export function ReelPlayer({
             className="flex h-14 w-14 flex-col items-center gap-1 text-white hover:bg-white/20"
             onClick={() => {
               setIsLiked(!isLiked);
+              tracking.like({ content_type: "reel", content_id: reel.id, creator_id: reel.user_id, context: "reel" });
               onLike?.(reel.id);
             }}
           >
@@ -207,7 +246,10 @@ export function ReelPlayer({
             variant="ghost"
             size="sm"
             className="flex h-14 w-14 flex-col items-center gap-1 text-white hover:bg-white/20"
-            onClick={() => onShare?.(reel.id)}
+            onClick={() => {
+              tracking.share({ content_type: "reel", content_id: reel.id, creator_id: reel.user_id, context: "reel" });
+              onShare?.(reel.id);
+            }}
           >
             <Share2 className="h-7 w-7" />
             <span className="text-[10px]">
@@ -221,6 +263,7 @@ export function ReelPlayer({
             className="flex h-14 w-14 flex-col items-center gap-1 text-white hover:bg-white/20"
             onClick={() => {
               setIsSaved(!isSaved);
+              tracking.save({ content_type: "reel", content_id: reel.id, creator_id: reel.user_id, context: "reel" });
               onSave?.(reel.id);
             }}
           >

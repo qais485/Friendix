@@ -43,11 +43,11 @@ function LiveDiscoveryView() {
   return (
     <div className="min-h-screen bg-background bg-gradient-to-br from-background via-background to-primary/5">
       <div className="mx-auto max-w-5xl px-4 py-6">
-        <div className="mb-8 flex items-center gap-3">
+        <div className="mb-8 flex flex-wrap items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-500/10 shadow-card transition-all duration-200">
             <Radio className="h-6 w-6 text-red-500" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold tracking-tight">Live Streams</h1>
             <p className="text-sm text-muted-foreground">Discover what's happening now</p>
           </div>
@@ -138,7 +138,7 @@ function LiveDiscoveryView() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="create-stream-title"
-            className="w-full max-w-md rounded-2xl glass-card p-6 shadow-float transition-all duration-200"
+            className="w-full max-w-md rounded-2xl glass-card p-6 shadow-float transition-all duration-200 max-h-[90vh] overflow-y-auto"
           >
             <h2 id="create-stream-title" className="text-xl font-bold">Create Live Stream</h2>
             <div className="mt-4 space-y-4">
@@ -273,14 +273,14 @@ function LiveStreamView({ streamId }: { streamId: string }) {
 
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="text-xl font-bold tracking-tight">{stream.title}</h1>
+                <h1 className="break-words text-xl font-bold tracking-tight">{stream.title}</h1>
                 <p className="mt-0.5 text-sm text-muted-foreground">
                   {stream.user?.display_name || stream.user?.username || "Unknown"} · {stream.viewers_count} viewers
                 </p>
               </div>
 
               {isHost && (
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {stream.status === "scheduled" && (
                     <Button size="sm" className="rounded-xl bg-red-500 hover:bg-red-600 transition-all duration-200 shadow-card hover:shadow-elevated" onClick={handleGoLive} disabled={goLive.isPending} aria-label="Start live stream">
                       {goLive.isPending ? "Starting..." : "Go Live"}
@@ -305,7 +305,7 @@ function LiveStreamView({ streamId }: { streamId: string }) {
 
             {stream.description && (
               <div className="rounded-2xl bg-muted/50 p-4 transition-all duration-200">
-                <p className="whitespace-pre-wrap text-sm text-muted-foreground">{stream.description}</p>
+                <p className="whitespace-pre-wrap break-words text-sm text-muted-foreground">{stream.description}</p>
               </div>
             )}
 

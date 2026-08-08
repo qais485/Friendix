@@ -2,6 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
 from app.models import ContentEvent, ContentProfile, MetricsState
@@ -25,14 +26,16 @@ class ContentMetricsRepository:
     # ── watermark ──────────────────────────────────────────
 
     def get_or_create_state(self) -> MetricsState:
-        state = self.db.execute(
-            select(MetricsState).where(MetricsState.id == 1).with_for_update()
-        ).scalar_one_or_none()
-        if state is None:
-            state = MetricsState(id=1, last_occurred_at=None, last_event_id=None)
-            self.db.add(state)
-            self.db.flush()
-        return state
+        stmt = pg_insert(MetricsState).values(id=1).on_conflict_do_nothing(
+            index_elements=[MetricsState.id]
+        )
+        self.db.execute(stmt)
+        self.db.flush()
+        return self.db.execute(
+            select(MetricsState)
+            .where(MetricsState.id == 1)
+            .with_for_update()
+        ).scalar_one()
 
     def advance_state(self, state: MetricsState, occurred_at, event_id) -> None:
         state.last_occurred_at = occurred_at

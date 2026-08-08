@@ -270,7 +270,7 @@ export function StoriesRow() {
 
   return (
     <>
-      <div className="rounded-2xl glass-card p-4">
+      <div className="rounded-2xl glass-card p-3 sm:p-4">
         {/* My Status Section */}
         <div className="mb-3">
           <div className="flex items-center justify-between">

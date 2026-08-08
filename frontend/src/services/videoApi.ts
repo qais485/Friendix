@@ -6,7 +6,6 @@ import type {
   Playlist, PlaylistDetail, PlaylistListResponse, PlaylistCreate, PlaylistUpdate,
   WatchHistoryListResponse,
   WatchLaterListResponse,
-  RecommendationListResponse,
 } from "@/types/videos";
 
 export const videoApi = {
@@ -63,6 +62,6 @@ export const videoApi = {
   clearWatchHistory: () => api.delete("/videos/history"),
 
   // Recommendations
-  getRecommendations: (videoId?: string, limit?: number) =>
-    api.get<RecommendationListResponse>("/videos/recommendations/feed", { params: { video_id: videoId, limit } }),
+  getRecommendations: (_videoId?: string, limit?: number) =>
+    api.get<VideoListResponse>("/feed/for-you/videos", { params: { limit } }),
 };

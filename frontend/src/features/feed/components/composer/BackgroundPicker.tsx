@@ -92,9 +92,13 @@ export function BackgroundPicker({
   useEffect(() => {
     if (isOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
+      // Clamp the popup's center so it stays fully on-screen on any viewport width.
+      const half = Math.min(180, Math.floor(window.innerWidth / 2) - 8);
+      const rawLeft = rect.left + rect.width / 2;
+      const left = Math.min(Math.max(rawLeft, half), window.innerWidth - half);
       setPickerPos({
         top: rect.top - 8,
-        left: rect.left + rect.width / 2,
+        left,
       });
     }
   }, [isOpen]);
@@ -272,9 +276,9 @@ export function BackgroundPicker({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.95 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="fixed z-[9999] w-[360px] overflow-hidden rounded-2xl border bg-gray-900 shadow-2xl"
+          className="fixed z-[9999] w-[min(360px,calc(100vw-2rem))] overflow-hidden rounded-2xl border bg-gray-900 shadow-2xl"
           style={{
-            bottom: `calc(100vh - ${pickerPos.top}px + 8px)`,
+            bottom: `max(0.5rem, calc(100vh - ${pickerPos.top}px + 8px))`,
             left: `${pickerPos.left}px`,
             transform: "translateX(-50%)",
           }}

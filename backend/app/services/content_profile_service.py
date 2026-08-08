@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.metrics_config import get_metrics_config
 from app.repositories.content_profile_repository import ContentProfileRepository
 from app.schemas.content_profile import (
+    CONTENT_PROFILE_TYPES,
     ContentProfileListResponse,
     ContentProfileResponse,
     ContentProfileUpdate,
@@ -185,6 +186,38 @@ class ContentProfileService:
             total=total,
             profiles=[self._to_response(r) for r in rows],
         )
+
+    def delete(self, content_type: str, content_id: UUID) -> None:
+        """Remove the profile for a content item when it is deleted."""
+        self.repo.delete_content_profile(content_type, content_id)
+        self.db.commit()
+
+    def backfill(
+        self,
+        content_types: list[str] | None = None,
+        limit_per_type: int = 500,
+        prune: bool = True,
+    ) -> dict:
+        """Build profiles for every content item (optionally one type) and prune stale rows."""
+        types = list(content_types) if content_types else list(CONTENT_PROFILE_TYPES)
+        result = {"built": 0, "pruned": 0, "per_type": {}}
+        for content_type in types:
+            total = self.repo.count_source_rows(content_type)
+            offset = 0
+            built = 0
+            while offset < total:
+                ids = self.repo.list_content_ids_paginated(content_type, offset, limit_per_type)
+                if not ids:
+                    break
+                built += self.build_many(content_type, ids)
+                offset += len(ids)
+            pruned = self.repo.prune_stale(content_type) if prune else 0
+            if pruned:
+                self.db.commit()
+            result["built"] += built
+            result["pruned"] += pruned
+            result["per_type"][content_type] = {"total": total, "built": built, "pruned": pruned}
+        return result
 
     # ── helpers ────────────────────────────────────────────
 

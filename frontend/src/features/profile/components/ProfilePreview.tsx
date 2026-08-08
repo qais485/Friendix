@@ -56,7 +56,7 @@ export function ProfilePreview({ profile, isOpen, onClose }: ProfilePreviewProps
           </Button>
         </div>
 
-        <div className="relative px-6 pb-6">
+        <div className="relative px-4 pb-4 sm:px-6 sm:pb-6">
           <div className="-mt-12 flex justify-center">
             <div className="h-24 w-24 overflow-hidden rounded-full border-4 border-background bg-gradient-to-br from-primary/20 to-muted">
               {profile.avatar_url ? (
@@ -76,20 +76,20 @@ export function ProfilePreview({ profile, isOpen, onClose }: ProfilePreviewProps
           </div>
 
           <div className="mt-4 text-center">
-            <div className="flex items-center justify-center gap-2">
-              <h2 className="text-xl font-bold">{profile.full_name || "User"}</h2>
+            <div className="flex min-w-0 items-center justify-center gap-2">
+              <h2 className="min-w-0 break-words text-xl font-bold">{profile.full_name || "User"}</h2>
               {profile.is_verified && (
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-500">
+                <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-500">
                   <svg className="h-3 w-3 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
               )}
             </div>
-            {profile.username && <p className="text-muted-foreground">@{profile.username}</p>}
+            {profile.username && <p className="truncate text-muted-foreground">@{profile.username}</p>}
           </div>
 
-          {profile.bio && <p className="mt-4 text-center text-sm text-muted-foreground">{profile.bio}</p>}
+          {profile.bio && <p className="mt-4 break-words text-center text-sm text-muted-foreground">{profile.bio}</p>}
 
           <div className="mt-4 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {profile.location && <span>{profile.location}</span>}
@@ -103,9 +103,9 @@ export function ProfilePreview({ profile, isOpen, onClose }: ProfilePreviewProps
                 href={profile.website.startsWith("http") ? profile.website : `https://${profile.website}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                className="inline-flex min-w-0 items-center gap-1 break-all text-sm text-primary hover:underline"
               >
-                <ExternalLink className="h-3 w-3" />
+                <ExternalLink className="h-3 w-3 shrink-0" />
                 {profile.website}
               </a>
             </div>

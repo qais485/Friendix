@@ -20,7 +20,7 @@ export function GroupListPage() {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          <div className="flex items-center justify-between pt-12 md:pt-0">
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-12 md:pt-0">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 shadow-card">
                 <Users className="h-6 w-6 text-primary" />
